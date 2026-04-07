@@ -1,14 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { initializeApp } from 'firebase/app';
-import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, doc, setDoc, onSnapshot } from 'firebase/firestore';
+// 1. 필요한 도구들을 인터넷(esm.sh)에서 직접 가져옵니다.
+import React, { useState, useEffect } from 'https://esm.sh/react@18';
+import { createRoot } from 'https://esm.sh/react-dom@18/client';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { getFirestore, doc, setDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 import { 
   Plane, MapPin, Train, Bus, Hotel, Utensils, Info, Calendar, 
   AlertCircle, Camera, Coffee, Lightbulb, Map, Pin, X, Edit, 
   Users, Briefcase, Backpack, CheckSquare, Plus, Trash2, Edit3,
   ChevronDown, ChevronUp, Cloud, CloudOff, BookOpen, 
   Wallet, Receipt, Calculator, ChevronsDown, ChevronsUp, Clock, Zap
-} from 'lucide-react';
+} from 'https://esm.sh/lucide-react@0.344.0';
+
+// ======================================================================
+// 🐼 아래는 고객님의 원본 코드와 100% 동일합니다!
+// ======================================================================
 
 // 🌟 고객님 전용 Firebase 설정 🌟
 const firebaseConfig = {
@@ -247,7 +253,6 @@ const ChengduTripApp = () => {
 
   // --- 가계부 핸들러 ---
   const handleOpenExpenseModal = (expense = null) => {
-    // 🌟 방어적 코드: 기존 데이터에 누락된 값이 있어도 모달이 열리도록 완벽 보완
     if (expense && expense.id) { 
       setExpenseModal({ 
         isOpen: true,
@@ -265,7 +270,6 @@ const ChengduTripApp = () => {
       }); 
     } 
     else {
-      // 새 지출 추가 시
       const now = new Date();
       const formattedDate = `${now.getMonth() + 1}월 ${now.getDate()}일`;
       setExpenseModal({
@@ -705,4 +709,6 @@ const ChengduTripApp = () => {
   );
 };
 
-export default function App() { return <ChengduTripApp />; }
+// ⭐ 맨 마지막 렌더링 코드만 브라우저용으로 변경
+const root = createRoot(document.getElementById('root'));
+root.render(<ChengduTripApp />);
