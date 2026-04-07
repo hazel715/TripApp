@@ -9,12 +9,8 @@ import {
   AlertCircle, Camera, Coffee, Lightbulb, Map, Pin, X, Edit, 
   Users, Briefcase, Backpack, CheckSquare, Plus, Trash2, Edit3,
   ChevronDown, ChevronUp, Cloud, CloudOff, BookOpen, 
-  Wallet, Receipt, Calculator, ChevronsDown, ChevronsUp, Clock, Zap
+  Wallet, Receipt, Calculator, ChevronsDown, ChevronsUp, Clock, Zap, List, AlignLeft
 } from 'https://esm.sh/lucide-react@0.344.0';
-
-// ======================================================================
-// 🐼 아래는 고객님의 원본 코드와 100% 동일합니다!
-// ======================================================================
 
 // 🌟 고객님 전용 Firebase 설정 🌟
 const firebaseConfig = {
@@ -49,49 +45,45 @@ const defaultItinerary = [
     day: 1, date: "4월 17일 (금)", title: "청두 도착 및 공항 이동",
     events: [
       { time: "20:00", type: "flight", desc: "인천공항 출발 (OZ323)", map: "https://maps.google.com/?q=Incheon+International+Airport", tip: "중국 입국 시 필요한 건강신고서(해관코드)를 미리 작성하고 캡처해 두면 수속이 빠릅니다." },
-      { time: "23:10", type: "flight", desc: "청두 톈푸 국제공항 도착", map: "https://maps.google.com/?q=Chengdu+Tianfu+International+Airport", memo: { title: "공항버스 탑승 가이드", content: "1단계: 대부분의 국제/국내선은 제2터미널(T2)로 도착합니다. 입국장을 나오면 2층입니다.\n2단계: 'Airport Bus(机场专线)' 표지판을 따라 에스컬레이터를 타고 1층(L1)으로 내려가세요.\n3단계: 9~11번 게이트 근처 공항버스 승강장에서 'Line 4(4号线)' 또는 'Chengdu East Railway Station(成都东客站)'행 탑승!" }, tip: "공항버스 비용 약 15~25위안. 위챗페이/알리페이 준비 필수! (야간 탑승 가능)" },
-      { time: "24:30", type: "hotel", desc: "청두 레이먼트 호텔 휴식", map: "https://www.google.com/maps/d/u/0/viewer?mid=1m3qTxlrAv17vMEjNgDRjb2Yfv2WgFcE", tip: "레이먼트 호텔은 청두동역과 인접하여 다음날 아침 일찍 송판행 기차를 타기에 최적의 위치입니다." }
+      { time: "23:10", type: "flight", desc: "청두 톈푸 국제공항 도착", map: "https://maps.google.com/?q=Chengdu+Tianfu+International+Airport", memo: { title: "공항버스 탑승 가이드", content: "1단계: 제2터미널(T2) 도착 후 1층(L1) 9~11번 게이트 근처 공항버스 승강장에서 'Line 4' 탑승!" }, tip: "공항버스 비용 약 15~25위안. 위챗페이/알리페이 준비 필수!" },
+      { time: "24:30", type: "hotel", desc: "청두 레이먼트 호텔 휴식", map: "https://www.google.com/maps/d/u/0/viewer?mid=1m3qTxlrAv17vMEjNgDRjb2Yfv2WgFcE", tip: "청두동역과 인접하여 다음날 이동에 최적입니다." }
     ]
   },
   {
     day: 2, date: "4월 18일 (토)", title: "황룡 대자연 관광",
     events: [
-      { time: "09:39", type: "train", desc: "청두동역 기차 탑승", map: "https://maps.google.com/?q=Chengdu+East+Railway+Station", tip: "중국 기차역은 짐 검사와 여권(실명제) 확인이 엄격해 줄이 길 수 있습니다. 출발 최소 1시간 전 도착 권장!" },
-      { time: "11:30", type: "bus", desc: "송판역 ➔ 황룡 (승합차 합승)", map: "https://maps.google.com/?q=Songpan+Railway+Station", tip: "기차역-황룡 구간 승합차(빵차) 합승 비용은 1인당 약 40~50위안 선입니다." },
-      { time: "12:30", type: "camera", desc: "황룡 에메랄드빛 연못 구경", map: "https://maps.google.com/?q=Huanglong+Scenic+Area", tip: "해발 3천미터 이상! 상행은 케이블카(약 80위안), 하행은 도보를 추천합니다. 고산병 약을 미리 복용하세요." },
-      { time: "19:30", type: "hotel", desc: "구채구 Holiday INN 휴식", map: "https://www.google.com/maps/d/u/0/viewer?mid=1m3qTxlrAv17vMEjNgDRjb2Yfv2WgFcE" }
+      { time: "09:39", type: "train", desc: "청두동역 기차 탑승", map: "https://maps.google.com/?q=Chengdu+East+Railway+Station" },
+      { time: "11:30", type: "bus", desc: "송판역 ➔ 황룡 (승합차 합승)" },
+      { time: "12:30", type: "camera", desc: "황룡 에메랄드빛 연못 구경", map: "https://maps.google.com/?q=Huanglong+Scenic+Area", tip: "해발 3천미터 이상! 고산병 약을 미리 복용하세요." },
+      { time: "19:30", type: "hotel", desc: "구채구 Holiday INN 휴식" }
     ]
   },
   {
     day: 3, date: "4월 19일 (일)", title: "구채구 핵심 투어",
     events: [
-      { time: "08:00", type: "camera", desc: "구채구 관광 시작", map: "https://maps.google.com/?q=Jiuzhaigou+Valley+National+Park", tip: "내부는 Y자 코스 셔틀버스 무제한 이용. 가장 높은 곳으로 셔틀을 타고 먼저 올라가서, 걸어 내려오며 호수를 구경하는 것이 국룰! 편한 신발 필수." },
-      { time: "16:00", type: "bus", desc: "구채구 ➔ 황룡구채역 (버스)", tip: "버스/합승차 비용 약 40~50위안. 탑승장에 여유롭게 도착하세요." },
+      { time: "08:00", type: "camera", desc: "구채구 관광 시작", map: "https://maps.google.com/?q=Jiuzhaigou+Valley+National+Park", tip: "Y자 코스 셔틀버스 이용. 가장 높은 곳에서 내려오며 구경하세요." },
       { time: "19:00", type: "train", desc: "황룡구채역 ➔ 청두동역 (기차)" },
-      { time: "22:00", type: "hotel", desc: "신위안 호텔(Xinyuan) 체크인", map: "https://www.google.com/maps/d/u/0/viewer?mid=1m3qTxlrAv17vMEjNgDRjb2Yfv2WgFcE", tip: "시내 중심부에 위치하여 내일 콴자이샹즈 등 시내 자유 여행을 시작하기에 아주 편리합니다." }
+      { time: "22:00", type: "hotel", desc: "신위안 호텔(Xinyuan) 체크인" }
     ]
   },
   {
-    day: 4, date: "4월 20일 (월)", title: "시내 자율 투어",
+    day: 4, date: "4월 20일 (월)", title: "진영 해피 벌스데이",
     events: [
       { isSlot: true, time: "20:00 이전", desc: "~ 20:00 까지 자유 일정" },
-      { time: "20:00", type: "bus", desc: "저녁 식사 후 공항으로 이동", tip: "퇴근 시간대 트래픽잼을 고려하여 택시보단 지하철(18호선) 공항 이동을 추천합니다." },
-      { time: "22:00", type: "flight", desc: "톈푸 국제공항 도착 및 수속", map: "https://maps.google.com/?q=Chengdu+Tianfu+International+Airport" }
+      { time: "22:00", type: "flight", desc: "톈푸 국제공항 도착 및 수속" }
     ]
   },
   {
     day: 5, date: "4월 21일 (화)", title: "인천 귀국",
     events: [
       { time: "00:10", type: "flight", desc: "청두 톈푸 공항 출발 (OZ323)" },
-      { time: "05:10", type: "flight", desc: "인천 국제공항 도착 및 해산", map: "https://maps.google.com/?q=Incheon+International+Airport" }
+      { time: "05:10", type: "flight", desc: "인천 국제공항 도착 및 해산" }
     ]
   }
 ];
 
-// 환율 설정 (26.03.27 하나은행 기준)
 const DEFAULT_CNY_RATE = 188.50; 
 const DEFAULT_USD_RATE = 1385.00; 
-
 const MEMBERS = ['MJ', 'JY', 'HJ'];
 const CATEGORIES = ['숙소', '교통', '관광', '식음료', '기타'];
 
@@ -104,18 +96,17 @@ const EVENT_ICONS = [
 
 const ChengduTripApp = () => {
   const [activeTab, setActiveTab] = useState('itinerary');
+  const [itineraryView, setItineraryView] = useState('grouped'); 
   const [expandedDays, setExpandedDays] = useState([1]);
   const [showChecklist, setShowChecklist] = useState(false);
   const [isEditingChecklist, setIsEditingChecklist] = useState(false);
   const [showTips, setShowTips] = useState(true);
 
-  // 모달 상태 관리
   const [expandedEventIds, setExpandedEventIds] = useState([]); 
   const [editModal, setEditModal] = useState({ isOpen: false, dayIdx: -1, eventIdx: -1, type: 'camera', time: '', desc: '', note: '', isNew: false });
   const [essentialModal, setEssentialModal] = useState({ isOpen: false, catIdx: -1, text: '' });
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, message: '', onConfirm: null });
   
-  // 가계부 모달 상태
   const [expenseModal, setExpenseModal] = useState({
     isOpen: false, id: null, payer: 'MJ', category: '식음료', date: '', title: '', 
     amount: '', currency: 'CNY', exchangeRate: DEFAULT_CNY_RATE, customRate: false, note: '', included: [...MEMBERS]
@@ -124,7 +115,6 @@ const ChengduTripApp = () => {
   const [showSettleModal, setShowSettleModal] = useState(false);
   const [expenseGroupBy, setExpenseGroupBy] = useState('date');
 
-  // 로컬 & 클라우드 데이터
   const [user, setUser] = useState(null);
   const [isCloudSyncing, setIsCloudSyncing] = useState(true);
   const [dbError, setDbError] = useState('');
@@ -135,10 +125,7 @@ const ChengduTripApp = () => {
   useEffect(() => {
     if (!auth) { setIsCloudSyncing(false); return; }
     const initAuth = async () => {
-      try { await signInAnonymously(auth); } catch (error) {
-        console.error("Auth init error", error);
-        setIsCloudSyncing(false);
-      }
+      try { await signInAnonymously(auth); } catch (error) { setIsCloudSyncing(false); }
     };
     initAuth();
     const unsubscribe = onAuthStateChanged(auth, setUser);
@@ -160,7 +147,7 @@ const ChengduTripApp = () => {
       }
       setIsCloudSyncing(false);
     }, (error) => {
-      setDbError("연결 실패: Firestore 규칙을 확인해주세요.");
+      setDbError("연결 실패: 데이터베이스 권한을 확인하세요.");
       setIsCloudSyncing(false);
     });
     return () => unsubscribe();
@@ -179,24 +166,47 @@ const ChengduTripApp = () => {
     } catch (error) { setDbError("저장 권한 없음"); } finally { setIsCloudSyncing(false); }
   };
 
-  // --- 날짜순 정렬 (과거는 뒤로) ---
+  const getEventDateObj = (dateText, timeStr) => {
+    const match = dateText.match(/(\d+)월\s*(\d+)일/);
+    if (!match) return new Date(2099, 0, 1);
+    const month = parseInt(match[1]) - 1;
+    const day = parseInt(match[2]);
+    const timeMatch = (timeStr || "00:00").match(/(\d+):(\d+)/);
+    const hour = timeMatch ? parseInt(timeMatch[1]) : 0;
+    const min = timeMatch ? parseInt(timeMatch[2]) : 0;
+    // 실제 운영 시 2026년도로 고정되어 있습니다.
+    return new Date(2026, month, day, hour, min);
+  };
+
+  // 일자별 정렬
   const sortedItinerary = (() => {
-    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     return [...itinerary].sort((a, b) => {
-      const parseDate = (str) => {
-        const match = str.match(/(\d+)월\s*(\d+)일/);
-        if (match) return new Date(2026, parseInt(match[1]) - 1, parseInt(match[2]));
-        return new Date(2099, 0, 1); 
-      };
-      const dateA = parseDate(a.date); const dateB = parseDate(b.date);
-      const isPastA = dateA < today; const isPastB = dateB < today;
+      const dateA = getEventDateObj(a.date, "00:00");
+      const dateB = getEventDateObj(b.date, "00:00");
+      const isPastA = dateA < today;
+      const isPastB = dateB < today;
       if (isPastA && !isPastB) return 1;
       if (!isPastA && isPastB) return -1;
       return a.day - b.day;
     });
   })();
 
-  // --- 일정 핸들러 ---
+  // 타임라인 정렬
+  const timelineEvents = (() => {
+    const flat = [];
+    itinerary.forEach((day, dIdx) => {
+      day.events.forEach((evt, eIdx) => {
+        flat.push({ ...evt, dIdx, eIdx, dateText: day.date, dateObj: getEventDateObj(day.date, evt.time) });
+      });
+    });
+    const now = new Date();
+    const future = flat.filter(e => e.dateObj >= now).sort((a, b) => a.dateObj - b.dateObj);
+    const past = flat.filter(e => e.dateObj < now).sort((a, b) => b.dateObj - a.dateObj);
+    return { future, past };
+  })();
+
   const toggleDay = (day) => setExpandedDays(prev => prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]);
   const toggleAllDays = () => {
     if (expandedDays.length === itinerary.length) { setExpandedDays([]); setExpandedEventIds([]); }
@@ -215,6 +225,7 @@ const ChengduTripApp = () => {
     setEditModal({ isOpen: true, dayIdx: originalDayIdx, eventIdx, type: currentEvent.type || 'info', time: currentEvent.time || '', desc: currentEvent.desc || '', note: currentEvent.note || '', isNew: false });
   };
   const handleAddEvent = (originalDayIdx) => setEditModal({ isOpen: true, dayIdx: originalDayIdx, eventIdx: -1, type: 'camera', time: '12:00', desc: '', note: '', isNew: true });
+  
   const saveEvent = () => {
     if (!editModal.desc || !editModal.desc.trim()) return;
     const newData = [...itinerary];
@@ -223,6 +234,7 @@ const ChengduTripApp = () => {
     else { newData[editModal.dayIdx].events[editModal.eventIdx] = { ...newData[editModal.dayIdx].events[editModal.eventIdx], ...eventData }; }
     syncToCloud({ itinerary: newData }); setEditModal({ ...editModal, isOpen: false });
   };
+
   const handleDeleteEvent = (originalDayIdx, eventIdx) => {
     setConfirmModal({ isOpen: true, message: '삭제하시겠습니까?', onConfirm: () => {
       const newData = [...itinerary]; newData[originalDayIdx].events.splice(eventIdx, 1);
@@ -230,8 +242,8 @@ const ChengduTripApp = () => {
     }});
   };
 
-  // --- 준비물 관련 핸들러 ---
   const handleAddEssential = (catIdx) => setEssentialModal({ isOpen: true, catIdx, text: '' });
+  
   const saveEssential = () => {
     if (essentialModal.text.trim() !== '') {
       const newData = [...essentials];
@@ -240,6 +252,7 @@ const ChengduTripApp = () => {
     }
     setEssentialModal({ isOpen: false, catIdx: -1, text: '' });
   };
+
   const handleRemoveEssential = (catIdx, itemIdx) => {
     setConfirmModal({
       isOpen: true, message: '이 준비물 항목을 삭제하시겠습니까?',
@@ -250,88 +263,39 @@ const ChengduTripApp = () => {
       }
     });
   };
+  // =====================================================================
 
-  // --- 가계부 핸들러 ---
   const handleOpenExpenseModal = (expense = null) => {
     if (expense && expense.id) { 
       setExpenseModal({ 
-        isOpen: true,
-        id: expense.id,
-        payer: expense.payer || 'MJ',
-        category: expense.category || '식음료',
-        date: expense.date || '',
-        title: expense.title || '',
-        amount: expense.amount || '',
-        currency: expense.currency || 'CNY',
+        isOpen: true, id: expense.id, payer: expense.payer || 'MJ', category: expense.category || '식음료', date: expense.date || '', title: expense.title || '',
+        amount: expense.amount || '', currency: expense.currency || 'CNY',
         exchangeRate: expense.exchangeRate || (expense.currency === 'USD' ? DEFAULT_USD_RATE : DEFAULT_CNY_RATE),
-        customRate: expense.customRate || false,
-        note: expense.note || '',
-        included: expense.included || [...MEMBERS]
+        customRate: expense.customRate || false, note: expense.note || '', included: expense.included || [...MEMBERS]
       }); 
     } 
     else {
-      const now = new Date();
-      const formattedDate = `${now.getMonth() + 1}월 ${now.getDate()}일`;
-      setExpenseModal({
-        isOpen: true, id: null, payer: 'MJ', category: '식음료', date: formattedDate, title: '', 
-        amount: '', currency: 'CNY', exchangeRate: DEFAULT_CNY_RATE, customRate: false, note: '', included: [...MEMBERS]
-      });
+      const now = new Date(); const formattedDate = `${now.getMonth() + 1}월 ${now.getDate()}일`;
+      setExpenseModal({ isOpen: true, id: null, payer: 'MJ', category: '식음료', date: formattedDate, title: '', amount: '', currency: 'CNY', exchangeRate: DEFAULT_CNY_RATE, customRate: false, note: '', included: [...MEMBERS] });
     }
   };
 
-  // ⚡ 초간편 메모 로직
   const saveQuickMemo = () => {
-    const text = quickMemoModal.text.trim();
-    if (!text) return;
-
-    let payer = 'MJ'; 
-    if (/mj|민정|전민정/i.test(text)) payer = 'MJ';
-    else if (/jy|진영|허진영/i.test(text)) payer = 'JY';
-    else if (/hj|혜진|박혜진/i.test(text)) payer = 'HJ';
-
+    const text = quickMemoModal.text.trim(); if (!text) return;
+    let payer = 'MJ'; if (/mj|민정|전민정/i.test(text)) payer = 'MJ'; else if (/jy|진영|허진영/i.test(text)) payer = 'JY'; else if (/hj|혜진|박혜진/i.test(text)) payer = 'HJ';
     let currency = 'CNY'; let rate = DEFAULT_CNY_RATE;
     if (/(달러|\$|usd)/i.test(text)) { currency = 'USD'; rate = DEFAULT_USD_RATE; }
     else if (/(원|만원|krw)/i.test(text)) { currency = 'KRW'; rate = 1; }
-
-    const amountMatch = text.match(/\d+/);
-    let amount = amountMatch ? parseInt(amountMatch[0]) : 0;
-    
-    if (/만원/.test(text) && amount < 1000) amount = amount * 10000;
-
-    let title = text.replace(/mj|jy|hj|민정|진영|혜진|전민정|허진영|박혜진|달러|\$|usd|원|만원|krw|\d+/gi, '').trim();
-    if (!title) title = "빠른 메모 지출";
-
-    const now = new Date();
-    const formattedDate = `${now.getMonth() + 1}월 ${now.getDate()}일`;
-
-    const newExpense = {
-      id: Date.now().toString(),
-      payer,
-      category: '기타',
-      date: formattedDate,
-      title,
-      amount,
-      currency,
-      exchangeRate: rate,
-      customRate: false,
-      note: `빠른 메모 (${now.toLocaleTimeString()})`,
-      included: [...MEMBERS]
-    };
-
-    const newData = [...expenses, newExpense];
-    newData.sort((a, b) => {
-      if (a.date === '일자 미지정') return 1;
-      if (b.date === '일자 미지정') return -1;
-      return a.date.localeCompare(b.date);
-    });
-
-    syncToCloud({ expenses: newData });
-    setQuickMemoModal({ isOpen: false, text: '' });
+    const amountMatch = text.match(/\d+/); let amount = amountMatch ? parseInt(amountMatch[0]) : 0;
+    if (/만원/.test(text) && amount < 1000) amount *= 10000;
+    let title = text.replace(/mj|jy|hj|민정|진영|혜진|전민정|허진영|박혜진|달러|\$|usd|원|만원|krw|\d+/gi, '').trim() || "빠른 메모 지출";
+    const now = new Date(); const formattedDate = `${now.getMonth() + 1}월 ${now.getDate()}일`;
+    const newExpense = { id: Date.now().toString(), payer, category: '기타', date: formattedDate, title, amount, currency, exchangeRate: rate, customRate: false, note: `빠른 메모 (${now.toLocaleTimeString()})`, included: [...MEMBERS] };
+    syncToCloud({ expenses: [...expenses, newExpense] }); setQuickMemoModal({ isOpen: false, text: '' });
   };
-
   const toggleIncludedPerson = (person) => {
     setExpenseModal(prev => {
-      const newIncluded = prev.included.includes(person) ? prev.included.filter(p => p !== person) : [...prev.included, person];
+      const newIncluded = prev.included?.includes(person) ? prev.included.filter(p => p !== person) : [...(prev.included || []), person];
       return { ...prev, included: newIncluded };
     });
   };
@@ -349,7 +313,7 @@ const ChengduTripApp = () => {
       exchangeRate: parseFloat(expenseModal.exchangeRate) || (expenseModal.currency === 'USD' ? DEFAULT_USD_RATE : DEFAULT_CNY_RATE),
       customRate: expenseModal.customRate,
       note: expenseModal.note,
-      included: expenseModal.included
+      included: expenseModal.included || [...MEMBERS]
     };
     let newData = expenseModal.id ? expenses.map(e => e.id === expenseModal.id ? newExpense : e) : [...expenses, newExpense];
     newData.sort((a, b) => {
@@ -371,48 +335,33 @@ const ChengduTripApp = () => {
       }
     });
   };
-
-  const getConvertedAmount = (exp) => exp.currency === 'KRW' ? exp.amount : Math.round(exp.amount * exp.exchangeRate);
+  
+  const getConvertedAmount = (exp) => {
+    if (exp.currency === 'KRW') return exp.amount;
+    const rate = exp.exchangeRate || (exp.currency === 'USD' ? DEFAULT_USD_RATE : DEFAULT_CNY_RATE);
+    return Math.round(exp.amount * rate);
+  };
 
   const groupedExpenses = expenses.reduce((acc, curr) => {
     const key = curr[expenseGroupBy] || '기타';
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(curr);
-    return acc;
+    if (!acc[key]) acc[key] = []; acc[key].push(curr); return acc;
   }, {});
   
-  const groupedKeys = Object.keys(groupedExpenses).sort((a, b) => {
-    if (expenseGroupBy === 'date') {
-      if (a === '일자 미지정') return 1;
-      if (b === '일자 미지정') return -1;
-    }
-    return a.localeCompare(b);
-  });
-  
+  const groupedKeys = Object.keys(groupedExpenses).sort((a, b) => expenseGroupBy === 'date' ? (a === '일자 미지정' ? 1 : b === '일자 미지정' ? -1 : a.localeCompare(b)) : a.localeCompare(b));
   const totalGrandAmount = expenses.reduce((sum, exp) => sum + getConvertedAmount(exp), 0);
 
   const calculateSettlement = () => {
-    const paid = { MJ: 0, JY: 0, HJ: 0 };
-    const spent = { MJ: 0, JY: 0, HJ: 0 };
-    const balances = { MJ: 0, JY: 0, HJ: 0 }; 
+    const paid = { MJ: 0, JY: 0, HJ: 0 }; const spent = { MJ: 0, JY: 0, HJ: 0 }; const balances = { MJ: 0, JY: 0, HJ: 0 }; 
     expenses.forEach(exp => {
-      const amt = getConvertedAmount(exp);
-      paid[exp.payer] += amt;
-      balances[exp.payer] += amt;
-      const splitAmt = amt / exp.included.length;
-      exp.included.forEach(person => { spent[person] += splitAmt; balances[person] -= splitAmt; });
+      const amt = getConvertedAmount(exp); paid[exp.payer] += amt; balances[exp.payer] += amt;
+      const splitAmt = amt / (exp.included?.length || 1); exp.included?.forEach(person => { spent[person] += splitAmt; balances[person] -= splitAmt; });
     });
     let debtors = Object.keys(balances).filter(p => balances[p] <= -1).map(p => ({ p, amt: -balances[p] }));
     let creditors = Object.keys(balances).filter(p => balances[p] >= 1).map(p => ({ p, amt: balances[p] }));
-    let transfers = [];
-    debtors.sort((a, b) => b.amt - a.amt);
-    creditors.sort((a, b) => b.amt - a.amt);
-    let i = 0, j = 0;
-    while (i < debtors.length && j < creditors.length) {
-      let d = debtors[i], c = creditors[j];
-      let amount = Math.min(d.amt, c.amt);
-      transfers.push({ from: d.p, to: c.p, amount: Math.round(amount) });
-      d.amt -= amount; c.amt -= amount;
+    let transfers = []; debtors.sort((a, b) => b.amt - a.amt); creditors.sort((a, b) => b.amt - a.amt);
+    let i = 0, j = 0; while (i < debtors.length && j < creditors.length) {
+      let d = debtors[i], c = creditors[j]; let amount = Math.min(d.amt, c.amt);
+      transfers.push({ from: d.p, to: c.p, amount: Math.round(amount) }); d.amt -= amount; c.amt -= amount;
       if (d.amt < 1) i++; if (c.amt < 1) j++;
     }
     return { paid, spent, balances, transfers };
@@ -432,6 +381,47 @@ const ChengduTripApp = () => {
     }
   };
 
+  const renderEvent = (event, dayIdx, eventIdx, isTimeline = false) => {
+    const isPast = isTimeline && event.dateObj < new Date();
+    // 🌟 Key 중복 오류 방지용 고유 키 생성
+    const uniqueKey = `${dayIdx}-${eventIdx}`;
+    
+    return (
+      <div key={uniqueKey} className={`flex relative group ${isPast ? 'opacity-40 grayscale blur-[0.5px]' : ''}`}>
+        {!isTimeline && eventIdx !== itinerary[dayIdx].events.length - 1 && <div className="absolute top-8 bottom-[-24px] left-[23px] w-0.5 bg-gray-200"></div>}
+        {isTimeline && <div className="absolute top-8 bottom-[-24px] left-[23px] w-0.5 bg-emerald-100/50"></div>}
+        
+        {event.isSlot ? (
+          <div className="w-full border-2 border-dashed border-emerald-300 bg-emerald-50/50 rounded-xl p-4 text-center mt-2">
+            <span className="text-emerald-700 font-bold mb-1 text-sm">{isTimeline ? `${event.dateText} | ` : ''}{event.time} | {event.desc}</span>
+            <div className="flex gap-2 w-full mt-3"><button onClick={() => handleEditEvent(dayIdx, eventIdx)} className="flex-1 bg-emerald-600 text-white text-sm font-bold py-2 rounded-lg flex items-center justify-center transition-colors"><Edit size={16} className="mr-1" /> 편집</button><button onClick={() => handleDeleteEvent(dayIdx, eventIdx)} className="bg-red-50 text-red-500 font-bold py-2 px-3 rounded-lg"><Trash2 size={16} /></button></div>
+          </div>
+        ) : (
+          <>
+            <div className="w-12 text-xs font-bold text-gray-500 pt-1 shrink-0">
+              {isTimeline ? <div className="text-[10px] text-emerald-700 font-black mb-0.5">{event.dateText.split(' ')[1]}</div> : null}
+              {event.time}
+            </div>
+            <div className="mx-2 bg-white w-8 h-8 rounded-full shadow-sm flex items-center justify-center border border-gray-100 z-10 shrink-0">{getEventIcon(event.type)}</div>
+            <div className="pt-1 pb-2 pl-2 w-full cursor-pointer hover:bg-emerald-50/30 rounded-lg transition-colors" onClick={() => toggleEventDetails(dayIdx, eventIdx)}>
+              <div className="text-sm font-bold text-gray-800 flex items-start justify-between flex-wrap gap-2">
+                <span className="mt-1 flex-1 min-w-[120px] flex items-center">{event.desc} {expandedEventIds.includes(uniqueKey) ? <ChevronUp size={16} className="ml-1 text-emerald-500 shrink-0" /> : <ChevronDown size={16} className="ml-1 text-gray-400 shrink-0" />}</span>
+                <div className="flex gap-1 shrink-0 items-center">
+                  {event.map && <a href={event.map} target="_blank" rel="noreferrer" className="bg-gray-100 px-2 py-1.5 rounded text-[11px] font-bold" onClick={(e) => e.stopPropagation()}><MapPin size={12} /> 맵</a>}
+                  <button onClick={(e) => { e.stopPropagation(); handleEditEvent(dayIdx, eventIdx); }} className="bg-gray-100 px-2 py-1.5 rounded text-[11px] font-bold"><Edit size={12} /></button>
+                  <button onClick={(e) => { e.stopPropagation(); handleDeleteEvent(dayIdx, eventIdx); }} className="bg-red-50 text-red-400 px-2 py-1.5 rounded text-[11px] font-bold"><Trash2 size={12} /></button>
+                </div>
+              </div>
+              {expandedEventIds.includes(uniqueKey) && ( <div className="mt-3 p-3 bg-white border border-emerald-100 rounded-lg shadow-sm text-sm text-gray-700 whitespace-pre-wrap">{event.note || <span className="text-gray-400 text-xs italic">비고 없음</span>}</div> )}
+              {showTips && event.memo && !expandedEventIds.includes(uniqueKey) && ( <div className="mt-3 bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded shadow-sm text-xs text-yellow-900 leading-relaxed whitespace-pre-line"><strong>{event.memo.title}</strong><br/>{event.memo.content}</div> )}
+              {showTips && event.tip && ( <div className="mt-2 bg-blue-50 border-l-4 border-blue-400 p-2.5 rounded shadow-sm flex items-start text-xs text-blue-800 leading-relaxed"><Lightbulb size={14} className="text-blue-600 mr-2 mt-0.5 shrink-0" />{event.tip}</div> )}
+            </div>
+          </>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="max-w-md mx-auto bg-gray-50 min-h-screen shadow-lg font-sans text-gray-800 relative pb-24">
       {/* Header */}
@@ -446,8 +436,8 @@ const ChengduTripApp = () => {
             <div className="flex items-center text-sm opacity-90"><Users size={16} className="mr-2" /><span>MJ, JY, HJ</span></div>
           </div>
           <div className="flex gap-2 shrink-0 mt-1">
-            <a href="https://www.notion.so/moeng/31f8df0b230c80f88c7ad47124b8eec8" target="_blank" rel="noreferrer" className="bg-[#064e3b] text-white p-3 rounded-full shadow-sm flex items-center justify-center"><BookOpen size={20} /></a>
-            <button onClick={() => setShowChecklist(true)} className="bg-[#064e3b] text-white p-3 rounded-full shadow-sm flex items-center justify-center"><Backpack size={20} /></button>
+            <a href="https://www.notion.so/moeng/31f8df0b230c80f88c7ad47124b8eec8" target="_blank" rel="noreferrer" className="bg-[#064e3b] text-white p-3 rounded-full shadow-sm flex items-center justify-center transition-colors"><BookOpen size={20} /></a>
+            <button onClick={() => setShowChecklist(true)} className="bg-[#064e3b] text-white p-3 rounded-full shadow-sm flex items-center justify-center transition-colors"><Backpack size={20} /></button>
           </div>
         </div>
       </header>
@@ -466,17 +456,17 @@ const ChengduTripApp = () => {
           <div className="space-y-4 animate-fadeIn">
             <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
               <h2 className="text-lg font-bold text-gray-800 mb-3 flex items-center"><AlertCircle size={20} className="mr-2 text-emerald-600" />포인트</h2>
-              <ul className="space-y-3 text-sm">
-                <li className="flex items-start"><span className="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded mr-3 text-xs font-bold mt-0.5 shrink-0">자연</span><span className="text-gray-600">구채구와 황룡 자연 힐링</span></li>
-                <li className="flex items-start"><span className="bg-orange-100 text-orange-800 px-2 py-0.5 rounded mr-3 text-xs font-bold mt-0.5 shrink-0">식사</span><span className="text-gray-600">다양한 사천요리와 길거리 음식 탐방</span></li>
+              <ul className="space-y-3 text-sm text-gray-600">
+                <li className="flex items-start"><span className="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded mr-3 text-xs font-bold mt-0.5 shrink-0">자연</span>구채구와 황룡 자연 힐링</li>
+                <li className="flex items-start"><span className="bg-orange-100 text-orange-800 px-2 py-0.5 rounded mr-3 text-xs font-bold mt-0.5 shrink-0">식사</span>사천요리와 길거리 음식 탐방</li>
               </ul>
             </div>
             <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-              <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center"><Hotel size={20} className="mr-2 text-indigo-500" />숙소</h2>
+              <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center"><Hotel size={20} className="mr-2 text-indigo-500" />숙소 정보</h2>
               <div className="space-y-4 text-sm text-gray-600">
                 <div><strong>1일차:</strong> 청두 레이먼트 호텔</div>
                 <div><strong>2일차:</strong> Holiday INN EXP Jiuzhaigou</div>
-                <div><strong>3일차:</strong> 신위안 호텔 (청두)</div>
+                <div><strong>3일차:</strong> 신위안 호텔 (청두 시내)</div>
               </div>
             </div>
           </div>
@@ -484,61 +474,68 @@ const ChengduTripApp = () => {
 
         {activeTab === 'itinerary' && (
           <div className="space-y-4 pb-4 animate-fadeIn">
+            <div className="flex bg-white p-1 rounded-xl shadow-sm border border-gray-100 mb-4">
+              <button 
+                onClick={() => setItineraryView('grouped')} 
+                className={`flex-1 flex items-center justify-center py-2 rounded-lg text-xs font-bold transition-colors ${itineraryView === 'grouped' ? 'bg-emerald-600 text-white shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+              >
+                <List size={14} className="mr-1.5" /> 일자별 보기
+              </button>
+              <button 
+                onClick={() => setItineraryView('timeline')} 
+                className={`flex-1 flex items-center justify-center py-2 rounded-lg text-xs font-bold transition-colors ${itineraryView === 'timeline' ? 'bg-emerald-600 text-white shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+              >
+                <AlignLeft size={14} className="mr-1.5" /> 타임라인 (Now)
+              </button>
+            </div>
+
             <div className="flex justify-between items-center mb-2">
               <label className="flex items-center text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1.5 rounded-lg cursor-pointer">
                 <input type="checkbox" checked={showTips} onChange={(e) => setShowTips(e.target.checked)} className="mr-1.5 accent-emerald-600 w-3.5 h-3.5" /> 팁 표시
               </label>
-              <button onClick={toggleAllDays} className="flex items-center text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1.5 rounded-full">
-                {expandedDays.length === itinerary.length ? <ChevronsUp size={14} className="mr-1"/> : <ChevronsDown size={14} className="mr-1"/>} {expandedDays.length === itinerary.length ? '전체 접기' : '전체 펼치기'}
-              </button>
+              {itineraryView === 'grouped' && (
+                <button onClick={toggleAllDays} className="flex items-center text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1.5 rounded-full">
+                  {expandedDays.length === itinerary.length ? <ChevronsUp size={14} className="mr-1"/> : <ChevronsDown size={14} className="mr-1"/>} 전체
+                </button>
+              )}
             </div>
-            {sortedItinerary.map((day) => {
-              const originalDayIdx = itinerary.findIndex(d => d.day === day.day);
-              return (
-                <div key={day.day} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-3">
-                  <button onClick={() => toggleDay(day.day)} className="w-full text-left p-4 flex justify-between items-center transition-colors">
-                    <div><span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full mb-1 inline-block">Day {day.day}</span><h3 className="font-bold text-gray-800 mt-1">{day.date}</h3><p className="text-sm text-gray-500">{day.title}</p></div>
-                    <div className={`transform transition-transform ${expandedDays.includes(day.day) ? 'rotate-180' : ''}`}><ChevronDown size={20} className="text-gray-400" /></div>
-                  </button>
-                  {expandedDays.includes(day.day) && (
-                    <div className="p-4 pt-0 border-t border-gray-50 bg-gray-50/50">
-                      <div className="mt-4 space-y-6">
-                        {day.events.map((event, eventIdx) => (
-                          <div key={eventIdx} className="flex relative group">
-                            {eventIdx !== day.events.length - 1 && <div className="absolute top-8 bottom-[-24px] left-[23px] w-0.5 bg-gray-200"></div>}
-                            {event.isSlot ? (
-                              <div className="w-full border-2 border-dashed border-emerald-300 bg-emerald-50/50 rounded-xl p-4 text-center mt-2">
-                                <span className="text-emerald-700 font-bold mb-1 text-sm">{event.time} | {event.desc}</span>
-                                <div className="flex gap-2 w-full mt-3"><button onClick={() => handleEditEvent(originalDayIdx, eventIdx)} className="flex-1 bg-emerald-600 text-white text-sm font-bold py-2 rounded-lg flex items-center justify-center transition-colors"><Edit size={16} className="mr-1" /> 편집</button><button onClick={() => handleDeleteEvent(originalDayIdx, eventIdx)} className="bg-red-50 text-red-500 font-bold py-2 px-3 rounded-lg flex items-center justify-center transition-colors"><Trash2 size={16} /></button></div>
-                              </div>
-                            ) : (
-                              <>
-                                <div className="w-12 text-xs font-bold text-gray-500 pt-1 shrink-0">{event.time}</div>
-                                <div className="mx-2 bg-white w-8 h-8 rounded-full shadow-sm flex items-center justify-center border border-gray-100 z-10 shrink-0">{getEventIcon(event.type)}</div>
-                                <div className="pt-1 pb-2 pl-2 w-full cursor-pointer hover:bg-emerald-50/30 rounded-lg transition-colors" onClick={() => toggleEventDetails(originalDayIdx, eventIdx)}>
-                                  <div className="text-sm font-bold text-gray-800 flex items-start justify-between flex-wrap gap-2">
-                                    <span className="mt-1 flex-1 min-w-[120px] flex items-center">{event.desc} {expandedEventIds.includes(`${originalDayIdx}-${eventIdx}`) ? <ChevronUp size={16} className="ml-1 text-emerald-500 shrink-0" /> : <ChevronDown size={16} className="ml-1 text-gray-400 shrink-0" />}</span>
-                                    <div className="flex gap-1 shrink-0 items-center">
-                                      {event.map && <a href={event.map} target="_blank" rel="noreferrer" className="bg-gray-100 px-2 py-1.5 rounded text-[11px] font-bold" onClick={(e) => e.stopPropagation()}><MapPin size={12} /> 맵</a>}
-                                      <button onClick={(e) => { e.stopPropagation(); handleEditEvent(originalDayIdx, eventIdx); }} className="bg-gray-100 px-2 py-1.5 rounded text-[11px] font-bold"><Edit size={12} /></button>
-                                      <button onClick={(e) => { e.stopPropagation(); handleDeleteEvent(originalDayIdx, eventIdx); }} className="bg-red-50 text-red-400 px-2 py-1.5 rounded text-[11px] font-bold"><Trash2 size={12} /></button>
-                                    </div>
-                                  </div>
-                                  {expandedEventIds.includes(`${originalDayIdx}-${eventIdx}`) && ( <div className="mt-3 p-3 bg-white border border-emerald-100 rounded-lg shadow-sm text-sm text-gray-700 whitespace-pre-wrap">{event.note || <span className="text-gray-400 text-xs italic">비고 없음</span>}</div> )}
-                                  {showTips && event.memo && !expandedEventIds.includes(`${originalDayIdx}-${eventIdx}`) && ( <div className="mt-3 bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded shadow-sm text-xs text-yellow-900 leading-relaxed whitespace-pre-line"><strong>{event.memo.title}</strong><br/>{event.memo.content}</div> )}
-                                  {showTips && event.tip && ( <div className="mt-2 bg-blue-50 border-l-4 border-blue-400 p-2.5 rounded shadow-sm flex items-start text-xs text-blue-800 leading-relaxed"><Lightbulb size={14} className="text-blue-600 mr-2 mt-0.5 shrink-0" />{event.tip}</div> )}
-                                </div>
-                              </>
-                            )}
-                          </div>
-                        ))}
+
+            {itineraryView === 'grouped' ? (
+              sortedItinerary.map((day) => {
+                const originalDayIdx = itinerary.findIndex(d => d.day === day.day);
+                return (
+                  <div key={day.day} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-3">
+                    <button onClick={() => toggleDay(day.day)} className="w-full text-left p-4 flex justify-between items-center transition-colors hover:bg-gray-50">
+                      <div><span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full mb-1 inline-block">Day {day.day}</span><h3 className="font-bold text-gray-800 mt-1">{day.date}</h3><p className="text-sm text-gray-500">{day.title}</p></div>
+                      <div className={`transform transition-transform ${expandedDays.includes(day.day) ? 'rotate-180' : ''}`}><ChevronDown size={20} className="text-gray-400" /></div>
+                    </button>
+                    {expandedDays.includes(day.day) && (
+                      <div className="p-4 pt-0 border-t border-gray-50 bg-gray-50/50">
+                        <div className="mt-4 space-y-6">
+                          {day.events.map((event, eventIdx) => renderEvent(event, originalDayIdx, eventIdx))}
+                        </div>
+                        <div className="mt-6 pt-4 border-t border-gray-100 flex justify-center"><button onClick={() => handleAddEvent(originalDayIdx)} className="text-emerald-600 font-bold flex items-center gap-1.5 bg-emerald-50 px-4 py-2 rounded-full w-full justify-center transition-colors hover:bg-emerald-100"><Plus size={14} /> 일정 추가</button></div>
                       </div>
-                      <div className="mt-6 pt-4 border-t border-gray-100 flex justify-center"><button onClick={() => handleAddEvent(originalDayIdx)} className="text-emerald-600 font-bold flex items-center gap-1.5 bg-emerald-50 px-4 py-2 rounded-full w-full justify-center transition-colors"><Plus size={14} /> 일정 추가</button></div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                    )}
+                  </div>
+                );
+              })
+            ) : (
+              <div className="space-y-6">
+                {timelineEvents.future.length > 0 && (
+                  <div className="space-y-6">
+                    <div className="text-[10px] font-black text-emerald-600 bg-emerald-100 px-2 py-1 rounded inline-block">남은 일정</div>
+                    {timelineEvents.future.map((event) => renderEvent(event, event.dIdx, event.eIdx, true))}
+                  </div>
+                )}
+                {timelineEvents.past.length > 0 && (
+                  <div className="space-y-6 pt-4 border-t-2 border-dashed border-gray-200">
+                    <div className="text-[10px] font-black text-gray-400 bg-gray-200 px-2 py-1 rounded inline-block">지난 일정</div>
+                    {timelineEvents.past.map((event) => renderEvent(event, event.dIdx, event.eIdx, true))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 
@@ -550,7 +547,7 @@ const ChengduTripApp = () => {
               </select>
             </div>
             {expenses.length === 0 ? (
-              <div className="bg-white p-10 rounded-2xl text-center border border-gray-100 shadow-sm flex flex-col items-center"><Receipt size={40} className="text-gray-300 mb-3" /><p className="text-gray-500 font-bold">등록된 지출 내역이 없습니다.</p></div>
+              <div className="bg-white p-10 rounded-2xl text-center border border-gray-100 shadow-sm flex flex-col items-center"><Receipt size={40} className="text-gray-300 mb-3" /><p className="text-gray-500 font-bold">지출 내역이 없습니다.</p></div>
             ) : (
               groupedKeys.map(groupKey => {
                 const groupTotal = groupedExpenses[groupKey].reduce((sum, exp) => sum + getConvertedAmount(exp), 0);
@@ -560,15 +557,12 @@ const ChengduTripApp = () => {
                     {groupedExpenses[groupKey].map(exp => (
                       <div key={exp.id} className="p-3 border-b last:border-0 hover:bg-emerald-50/30 cursor-pointer" onClick={() => handleOpenExpenseModal(exp)}>
                         <div className="flex justify-between items-start mb-1">
-                          <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-bold text-white bg-emerald-600 px-1.5 py-0.5 rounded">{exp.category}</span>
-                            <span className="font-bold text-gray-800 text-sm">{exp.title}</span>
-                          </div>
+                          <div className="flex items-center gap-2"><span className="text-[10px] font-bold text-white bg-emerald-600 px-1.5 py-0.5 rounded">{exp.category}</span><span className="font-bold text-gray-800 text-sm">{exp.title}</span></div>
                           <span className="font-bold text-gray-800">{getConvertedAmount(exp).toLocaleString()}원</span>
                         </div>
                         <div className="flex justify-between items-center text-xs text-gray-500">
-                          <span>결제: {exp.payer} ({exp.included ? exp.included.join(', ') : '전원'})</span>
-                          <span>{exp.currency === 'CNY' ? `¥${exp.amount}` : exp.currency === 'USD' ? `$${exp.amount}` : `₩${exp.amount}`}</span>
+                          <span>결제: {exp.payer} ({exp.included?.join(', ') || '전원'})</span>
+                          <span>{exp.currency === 'CNY' ? `¥${exp.amount.toLocaleString()}` : exp.currency === 'USD' ? `$${exp.amount.toLocaleString()}` : `₩${exp.amount.toLocaleString()}`}</span>
                         </div>
                       </div>
                     ))}
@@ -579,7 +573,7 @@ const ChengduTripApp = () => {
 
             <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t p-4 flex justify-between items-center z-20 shadow-lg">
               <div><p className="text-xs font-bold text-gray-500">총 지출액</p><p className="text-xl font-black text-emerald-700">{totalGrandAmount.toLocaleString()}원</p></div>
-              <button onClick={() => setShowSettleModal(true)} className="bg-emerald-600 text-white font-bold py-2.5 px-5 rounded-xl flex items-center gap-2 shadow-md"><Calculator size={18} /> 정산하기</button>
+              <button onClick={() => setShowSettleModal(true)} className="bg-emerald-600 text-white font-bold py-2.5 px-5 rounded-xl flex items-center gap-2 shadow-md hover:bg-emerald-700 transition-colors"><Calculator size={18} /> 정산하기</button>
             </div>
           </div>
         )}
@@ -602,7 +596,7 @@ const ChengduTripApp = () => {
         <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm animate-fadeIn">
           <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-5">
             <div className="flex items-center gap-2 mb-4 text-orange-600 font-bold"><Zap size={20} /> ⚡ 퀵메모 (결제자/금액/제목)</div>
-            <textarea autoFocus value={quickMemoModal.text} onChange={e => setQuickMemoModal({...quickMemoModal, text: e.target.value})} className="w-full border-2 border-orange-100 rounded-xl p-3 text-sm h-28 focus:border-orange-500 outline-none resize-none mb-4" placeholder="예: mj 훠궈 300 / 혜진 10달러 택시 / jy 3만원 간식" />
+            <textarea autoFocus value={quickMemoModal.text} onChange={e => setQuickMemoModal({...quickMemoModal, text: e.target.value})} className="w-full border-2 border-orange-100 rounded-xl p-3 text-sm h-28 focus:border-orange-500 outline-none resize-none mb-4" placeholder="예: mj 훠궈 300 / 혜진 $10 택시 / jy 3만원 간식" />
             <div className="flex gap-2"><button onClick={() => setQuickMemoModal({ isOpen: false, text: '' })} className="flex-1 bg-gray-100 py-3 rounded-xl font-bold text-gray-500">취소</button><button onClick={saveQuickMemo} className="flex-1 bg-orange-500 text-white py-3 rounded-xl font-bold">즉시 저장</button></div>
           </div>
         </div>
@@ -613,7 +607,7 @@ const ChengduTripApp = () => {
         <div className="fixed inset-0 bg-black/60 z-[90] flex items-center justify-center p-4 backdrop-blur-sm animate-fadeIn">
           <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div className="p-4 bg-emerald-700 text-white flex justify-between items-center shrink-0">
-              <h3 className="text-lg font-bold flex items-center"><Receipt size={18} className="mr-2" /> {expenseModal.id ? '지출 내역 수정' : '새 지출 내역'}</h3>
+              <h3 className="text-lg font-bold flex items-center"><Receipt size={18} className="mr-2" /> 지출 상세</h3>
               <button onClick={() => setExpenseModal({ ...expenseModal, isOpen: false })}><X size={20} /></button>
             </div>
             <div className="p-5 overflow-y-auto space-y-4 flex-1">
@@ -634,16 +628,16 @@ const ChengduTripApp = () => {
               {expenseModal.currency !== 'KRW' && (
                 <div className="bg-gray-50 p-3 rounded-xl border">
                   <label className="text-xs font-bold text-gray-600 flex items-center mb-1"><input type="checkbox" checked={expenseModal.customRate} onChange={e => setExpenseModal({...expenseModal, customRate: e.target.checked})} className="mr-1.5" /> 환율 직접 입력</label>
-                  {expenseModal.customRate ? <input type="number" value={expenseModal.exchangeRate} onChange={e => setExpenseModal({...expenseModal, exchangeRate: e.target.value})} className="w-full border rounded-lg p-2 text-sm" /> : <p className="text-sm font-bold text-gray-500 p-1">{expenseModal.currency === 'USD' ? DEFAULT_USD_RATE : DEFAULT_CNY_RATE}원</p>}
+                  {expenseModal.customRate ? <input type="number" value={expenseModal.exchangeRate} onChange={e => setExpenseModal({...expenseModal, exchangeRate: e.target.value})} className="w-full border rounded-lg p-2 text-sm" /> : <p className="text-sm font-bold text-gray-500 p-1">{expenseModal.currency === 'USD' ? DEFAULT_USD_RATE.toLocaleString() : DEFAULT_CNY_RATE.toLocaleString()}원</p>}
                   <div className="mt-1 text-right font-bold text-emerald-700 text-xs">환산: {getConvertedAmount(expenseModal).toLocaleString()}원</div>
                 </div>
               )}
               <div><label className="block text-xs font-bold text-gray-600 mb-1">포함 인원 (N빵)</label>
-                <div className="flex gap-2">{MEMBERS.map(m => (<label key={m} className={`flex-1 border rounded-lg p-2 text-center text-sm font-bold cursor-pointer ${expenseModal.included.includes(m) ? 'bg-emerald-50 border-emerald-500 text-emerald-700' : 'bg-gray-50 text-gray-400'}`}><input type="checkbox" className="hidden" checked={expenseModal.included.includes(m)} onChange={() => toggleIncludedPerson(m)} />{m}</label>))}</div>
+                <div className="flex gap-2">{MEMBERS.map(m => (<label key={m} className={`flex-1 border rounded-lg p-2 text-center text-sm font-bold cursor-pointer ${expenseModal.included?.includes(m) ? 'bg-emerald-50 border-emerald-500 text-emerald-700' : 'bg-gray-50 text-gray-400'}`}><input type="checkbox" className="hidden" checked={expenseModal.included?.includes(m)} onChange={() => toggleIncludedPerson(m)} />{m}</label>))}</div>
               </div>
               <div><label className="block text-xs font-bold text-gray-600 mb-1">비고</label><input type="text" value={expenseModal.note} onChange={e => setExpenseModal({...expenseModal, note: e.target.value})} className="w-full border rounded-lg p-2 text-sm" /></div>
             </div>
-            <div className="p-4 bg-gray-50 border-t flex gap-2 shrink-0">{expenseModal.id && (<button onClick={() => { handleDeleteExpense(expenseModal.id); setExpenseModal({...expenseModal, isOpen: false}); }} className="bg-red-50 text-red-500 p-2 rounded-lg"><Trash2 size={20} /></button>)}<button onClick={saveExpense} className="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold">저장하기</button></div>
+            <div className="p-4 bg-gray-50 border-t flex gap-2 shrink-0">{expenseModal.id && (<button onClick={() => { handleDeleteExpense(expenseModal.id); setExpenseModal({...expenseModal, isOpen: false}); }} className="bg-red-50 text-red-500 p-2 rounded-lg hover:bg-red-100 transition-colors"><Trash2 size={20} /></button>)}<button onClick={saveExpense} className="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 transition-colors">저장하기</button></div>
           </div>
         </div>
       )}
@@ -659,12 +653,36 @@ const ChengduTripApp = () => {
                 return (
                   <div className="space-y-6">
                     <div className="bg-white rounded-xl shadow-sm border overflow-hidden"><table className="w-full text-xs text-center"><thead className="bg-gray-100 font-bold text-gray-600 border-b"><tr><th className="py-2">이름</th><th className="py-2">결제액</th><th className="py-2">실지출</th><th className="py-2">정산액</th></tr></thead><tbody className="divide-y text-gray-700">{MEMBERS.map(m => (<tr key={m}><td className="py-2 font-bold bg-gray-50">{m}</td><td className="py-2 text-emerald-600">{Math.round(paid[m]).toLocaleString()}</td><td className="py-2 text-red-500">{Math.round(spent[m]).toLocaleString()}</td><td className={`py-2 font-bold ${balances[m] > 0 ? 'text-blue-600' : balances[m] < 0 ? 'text-red-600' : 'text-gray-500'}`}>{balances[m] > 0 ? `+${Math.round(balances[m]).toLocaleString()}` : Math.round(balances[m]).toLocaleString()}</td></tr>))}</tbody></table></div>
-                    <div><h4 className="font-bold text-sm text-gray-800 mb-3 border-b pb-1">💸 송금 가이드</h4>{transfers.length === 0 ? <p className="text-center text-gray-500 py-4">모두 완벽하게 정산되었습니다!</p> : transfers.map((t, idx) => (<div key={idx} className="bg-blue-50 border border-blue-100 p-3 rounded-xl flex items-center justify-between mb-2"><div><span className="font-bold text-red-600 bg-white px-2 py-1 rounded-full text-xs">{t.from}</span><span className="mx-2 text-gray-400">➔</span><span className="font-bold text-blue-600 bg-white px-2 py-1 rounded-full text-xs">{t.to}</span></div><span className="font-black text-blue-800">{t.amount.toLocaleString()} 원</span></div>))}</div>
+                    <div><h4 className="font-bold text-sm text-gray-800 mb-3 border-b pb-1">💸 송금 가이드</h4>{transfers.length === 0 ? <p className="text-center text-gray-500 py-4 font-bold">🎉 완벽하게 정산되었습니다!</p> : transfers.map((t, idx) => (<div key={idx} className="bg-blue-50 border border-blue-100 p-3 rounded-xl flex items-center justify-between mb-2"><div><span className="font-bold text-red-600 bg-white px-2 py-1 rounded-full text-xs border border-red-100">{t.from}</span><span className="mx-2 text-gray-400">➔</span><span className="font-bold text-blue-600 bg-white px-2 py-1 rounded-full text-xs border border-blue-100">{t.to}</span></div><span className="font-black text-blue-800">{t.amount.toLocaleString()} 원</span></div>))}</div>
                   </div>
                 );
               })()}
             </div>
-            <div className="p-4 bg-white border-t shrink-0"><button onClick={() => setShowSettleModal(false)} className="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl">확인 완료</button></div>
+            <div className="p-4 bg-white border-t shrink-0"><button onClick={() => setShowSettleModal(false)} className="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl hover:bg-emerald-700 transition-colors">확인 완료</button></div>
+          </div>
+        </div>
+      )}
+      
+      {/* 🎒 Essential Input Modal (방금 추가한 무적 팝업창!) */}
+      {essentialModal.isOpen && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm animate-fadeIn" style={{ zIndex: 9999 }}>
+          <div className="bg-white rounded-2xl w-full max-w-xs shadow-2xl p-5">
+            <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+              <Plus size={18} className="mr-2 text-emerald-600" /> 준비물 추가
+            </h3>
+            <input 
+              type="text" 
+              autoFocus
+              value={essentialModal.text} 
+              onChange={(e) => setEssentialModal({...essentialModal, text: e.target.value})} 
+              className="w-full border-2 border-emerald-100 rounded-xl p-3 text-sm focus:border-emerald-500 outline-none mb-5" 
+              placeholder="추가할 물품 입력" 
+              onKeyPress={(e) => e.key === 'Enter' && saveEssential()}
+            />
+            <div className="flex gap-2">
+              <button onClick={() => setEssentialModal({ isOpen: false, catIdx: -1, text: '' })} className="flex-1 bg-gray-100 py-3 rounded-xl font-bold text-gray-500">취소</button>
+              <button onClick={saveEssential} className="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold">추가하기</button>
+            </div>
           </div>
         </div>
       )}
@@ -673,8 +691,8 @@ const ChengduTripApp = () => {
       {showChecklist && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fadeIn">
           <div className="bg-white rounded-2xl w-full max-w-sm max-h-[85vh] overflow-y-auto shadow-2xl relative">
-            <div className="sticky top-0 bg-emerald-700 text-white p-4 flex justify-between items-center z-10"><h2 className="text-lg font-bold flex items-center"><Backpack size={20} className="mr-2" /> 여행 필수 준비물</h2><div className="flex gap-2"><button onClick={() => setIsEditingChecklist(!isEditingChecklist)} className={`p-1.5 rounded-full transition-colors ${isEditingChecklist ? 'bg-emerald-500' : 'bg-emerald-800/50'}`}><Edit3 size={18} /></button><button onClick={() => setShowChecklist(false)} className="bg-emerald-800/50 p-1.5 rounded-full"><X size={18} /></button></div></div>
-            <div className="p-5 space-y-5">{essentials.map((group, catIdx) => (<div key={catIdx}><h3 className="text-sm font-bold text-emerald-800 border-b border-emerald-100 pb-1 mb-2">{group.category}</h3><ul className="space-y-2">{group.items.map((item, itemIdx) => (<li key={itemIdx} className="flex items-start justify-between group/item"><div className="flex items-start pr-2"><CheckSquare size={16} className="text-gray-300 mr-2 shrink-0 mt-0.5" /><span className="text-sm text-gray-700">{item}</span></div>{isEditingChecklist && <button onClick={() => handleRemoveEssential(catIdx, itemIdx)} className="text-red-400 p-1 bg-red-50 rounded"><Trash2 size={14} /></button>}</li>))}</ul>{isEditingChecklist && <button onClick={() => handleAddEssential(catIdx)} className="mt-2 text-[11px] text-emerald-600 bg-emerald-50 px-2 py-1 rounded font-bold flex items-center"><Plus size={12} className="mr-1" /> 항목 추가</button>}</div>))}</div>
+            <div className="sticky top-0 bg-emerald-700 text-white p-4 flex justify-between items-center z-10"><h2 className="text-lg font-bold flex items-center"><Backpack size={20} className="mr-2" /> 필수 준비물</h2><div className="flex gap-2"><button onClick={() => setIsEditingChecklist(!isEditingChecklist)} className={`p-1.5 rounded-full transition-colors ${isEditingChecklist ? 'bg-emerald-500 shadow-inner' : 'bg-emerald-800/50'}`}><Edit3 size={18} /></button><button onClick={() => setShowChecklist(false)} className="bg-emerald-800/50 p-1.5 rounded-full"><X size={18} /></button></div></div>
+            <div className="p-5 space-y-5">{essentials.map((group, catIdx) => (<div key={catIdx}><h3 className="text-sm font-bold text-emerald-800 border-b border-emerald-100 pb-1 mb-2">{group.category}</h3><ul className="space-y-2">{group.items.map((item, itemIdx) => (<li key={itemIdx} className="flex items-start justify-between group/item"><div className="flex items-start pr-2"><CheckSquare size={16} className="text-gray-300 mr-2 shrink-0 mt-0.5" /><span className="text-sm text-gray-700">{item}</span></div>{isEditingChecklist && <button onClick={() => handleRemoveEssential(catIdx, itemIdx)} className="text-red-400 p-1 bg-red-50 rounded"><Trash2 size={14} /></button>}</li>))}</ul>{isEditingChecklist && <button onClick={() => handleAddEssential(catIdx)} className="mt-2 text-[11px] text-emerald-600 bg-emerald-50 px-2 py-1 rounded font-bold flex items-center transition-colors hover:bg-emerald-100"><Plus size={12} className="mr-1" /> 항목 추가</button>}</div>))}</div>
           </div>
         </div>
       )}
@@ -682,10 +700,10 @@ const ChengduTripApp = () => {
       {/* Edit Event Modal */}
       {editModal.isOpen && (
         <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-5"><h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center"><Edit size={18} className="mr-2 text-emerald-600" />{editModal.isNew ? '새로운 일정 추가' : '일정 내용 수정'}</h3>
+          <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-5"><h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center"><Edit size={18} className="mr-2 text-emerald-600" />일정 편집</h3>
             <div className="space-y-4">
               <div className="grid grid-cols-4 gap-2">{EVENT_ICONS.map((icon) => (<button key={icon.type} onClick={() => setEditModal({...editModal, type: icon.type})} className={`flex flex-col items-center p-2 rounded-lg border ${editModal.type === icon.type ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200 bg-white'}`}>{getEventIcon(icon.type)}<span className="text-[10px] mt-1">{icon.label}</span></button>))}</div>
-              <div><label className="block text-xs font-bold text-gray-600 mb-1">시간</label><input type="text" value={editModal.time} onChange={(e) => setEditModal({...editModal, time: e.target.value})} className="w-full border rounded-lg p-2 text-sm outline-none" /></div>
+              <div><label className="block text-xs font-bold text-gray-600 mb-1">시간</label><input type="text" value={editModal.time} onChange={(e) => setEditModal({...editModal, time: e.target.value})} className="w-full border rounded-lg p-2 text-sm outline-none" placeholder="예: 14:00" /></div>
               <div><label className="block text-xs font-bold text-gray-600 mb-1">내용</label><input type="text" value={editModal.desc} onChange={(e) => setEditModal({...editModal, desc: e.target.value})} className="w-full border rounded-lg p-2 text-sm outline-none" /></div>
               <div><label className="block text-xs font-bold text-gray-600 mb-1">비고</label><textarea value={editModal.note} onChange={(e) => setEditModal({...editModal, note: e.target.value})} className="w-full border rounded-lg p-2 text-sm h-20 outline-none resize-none" /></div>
             </div>
@@ -697,18 +715,18 @@ const ChengduTripApp = () => {
       {/* Confirm Modal */}
       {confirmModal.isOpen && (
         <div className="fixed inset-0 bg-black/50 z-[80] flex items-center justify-center p-4 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-white rounded-2xl w-full max-w-xs shadow-2xl p-5 text-center"><AlertCircle size={32} className="text-red-500 mx-auto mb-3" /><h3 className="text-sm font-bold text-gray-800 mb-5">{confirmModal.message}</h3><div className="flex gap-2"><button onClick={() => setConfirmModal({ ...confirmModal, isOpen: false })} className="flex-1 bg-gray-100 py-2 rounded-lg font-bold">취소</button><button onClick={confirmModal.onConfirm} className="flex-1 bg-red-500 text-white py-2 rounded-lg font-bold">삭제</button></div></div>
+          <div className="bg-white rounded-2xl w-full max-w-xs shadow-2xl p-5 text-center"><AlertCircle size={32} className="text-red-500 mx-auto mb-3" /><h3 className="text-sm font-bold text-gray-800 mb-5">{confirmModal.message}</h3><div className="flex gap-2"><button onClick={() => setConfirmModal({ ...confirmModal, isOpen: false })} className="flex-1 bg-gray-100 py-2 rounded-lg font-bold">취소</button><button onClick={confirmModal.onConfirm} className="flex-1 bg-red-500 text-white py-2 rounded-lg font-bold transition-colors hover:bg-red-600">삭제</button></div></div>
         </div>
       )}
 
       <style dangerouslySetInnerHTML={{__html: `
-        .animate-fadeIn { animation: fadeIn 0.2s ease-out forwards; }
+        .animate-fadeIn { animation: fadeIn 0.15s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
       `}} />
     </div>
   );
 };
 
-// ⭐ 맨 마지막 렌더링 코드만 브라우저용으로 변경
+// ⭐ 맨 마지막 렌더링 코드 (고객님 환경 맞춤)
 const root = createRoot(document.getElementById('root'));
 root.render(<ChengduTripApp />);
