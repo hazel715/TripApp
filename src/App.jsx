@@ -1,37 +1,22 @@
-// 1. 필요한 도구들을 인터넷(esm.sh)에서 직접 가져옵니다.
-import React, { useState, useEffect } from 'https://esm.sh/react@18';
-import { createRoot } from 'https://esm.sh/react-dom@18/client';
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { getFirestore, doc, setDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import React, { useState, useEffect } from 'react';
+import { 
+  auth, 
+  db, 
+  APP_ID, 
+  signInAnonymously, 
+  onAuthStateChanged, 
+  doc, 
+  setDoc, 
+  onSnapshot 
+} from './api/firebase';
 import { 
   Plane, MapPin, Train, Bus, Hotel, Utensils, Info, Calendar, 
   AlertCircle, Camera, Coffee, Lightbulb, Map, Pin, X, Edit, 
   Users, Briefcase, Backpack, CheckSquare, Plus, Trash2, Edit3,
   ChevronDown, ChevronUp, Cloud, CloudOff, BookOpen, 
   Wallet, Receipt, Calculator, ChevronsDown, ChevronsUp, Clock, Zap, List, AlignLeft
-} from 'https://esm.sh/lucide-react@0.344.0';
+} from 'lucide-react';
 
-// 🌟 고객님 전용 Firebase 설정 🌟
-const firebaseConfig = {
-  apiKey: "AIzaSyACcf-8Vw7oRGwqo3vnDnffgWjy5Rp-G38",
-  authDomain: "chengdu-trip-2026.firebaseapp.com",
-  projectId: "chengdu-trip-2026",
-  storageBucket: "chengdu-trip-2026.firebasestorage.app",
-  messagingSenderId: "528720468026",
-  appId: "1:528720468026:web:5236608e02e2ed9e91bd03"
-};
-
-let app, auth, db;
-const APP_ID = "chengdu-trip-2026"; 
-
-try {
-  app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
-  db = getFirestore(app);
-} catch (error) {
-  console.error("Firebase initialization error:", error);
-}
 
 const defaultEssentials = [
   { category: "필수 서류 및 결제", items: ["여권 (유효기간 6개월 이상)", "중국 비자 (사전 발급)", "알리페이 / 위챗페이 (카드 미리 등록 필수)"] },
@@ -727,6 +712,4 @@ const ChengduTripApp = () => {
   );
 };
 
-// ⭐ 맨 마지막 렌더링 코드 (고객님 환경 맞춤)
-const root = createRoot(document.getElementById('root'));
-root.render(<ChengduTripApp />);
+export default ChengduTripApp;
