@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'https://esm.sh/react@18';
 import { createRoot } from 'https://esm.sh/react-dom@18/client';
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { getFirestore, doc, setDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { getFirestore, doc, setDoc, updateDoc, arrayUnion, arrayRemove, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 import { 
   Plane, MapPin, Train, Bus, Hotel, Utensils, Info, Calendar, 
   AlertCircle, Camera, Coffee, Lightbulb, Map, Pin, X, Edit, 
@@ -143,7 +143,7 @@ const ChengduTripApp = () => {
         if (data.expenses) setExpenses(data.expenses);
         setDbError(''); 
       } else {
-        setDoc(docRef, { itinerary: defaultItinerary, essentials: defaultEssentials, expenses: [] });
+        setDoc(docRef, { itinerary: defaultItinerary, essentials: defaultEssentials, expenses: [] }, { merge: true });
       }
       setIsCloudSyncing(false);
     }, (error) => {
@@ -290,8 +290,16 @@ const ChengduTripApp = () => {
     if (/만원/.test(text) && amount < 1000) amount *= 10000;
     let title = text.replace(/mj|jy|hj|민정|진영|혜진|전민정|허진영|박혜진|달러|\$|usd|원|만원|krw|\d+/gi, '').trim() || "빠른 메모 지출";
     const now = new Date(); const formattedDate = `${now.getMonth() + 1}월 ${now.getDate()}일`;
+    
     const newExpense = { id: Date.now().toString(), payer, category: '기타', date: formattedDate, title, amount, currency, exchangeRate: rate, customRate: false, note: `빠른 메모 (${now.toLocaleTimeString()})`, included: [...MEMBERS] };
-    syncToCloud({ expenses: [...expenses, newExpense] }); setQuickMemoModal({ isOpen: false, text: '' });
+    
+    const docRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'trip_data', 'main');
+    setIsCloudSyncing(true);
+    updateDoc(docRef, {
+      expenses: arrayUnion(newExpense)
+    }).finally(() => setIsCloudSyncing(false));
+    
+    setQuickMemoModal({ isOpen: false, text: '' });
   };
   const toggleIncludedPerson = (person) => {
     setExpenseModal(prev => {
@@ -315,13 +323,25 @@ const ChengduTripApp = () => {
       note: expenseModal.note,
       included: expenseModal.included || [...MEMBERS]
     };
-    let newData = expenseModal.id ? expenses.map(e => e.id === expenseModal.id ? newExpense : e) : [...expenses, newExpense];
-    newData.sort((a, b) => {
-      if (a.date === '일자 미지정') return 1;
-      if (b.date === '일자 미지정') return -1;
-      return a.date.localeCompare(b.date);
-    });
-    syncToCloud({ expenses: newData });
+
+    if (expenseModal.id) {
+      // 기존 내역 수정 시
+      let newData = expenses.map(e => e.id === expenseModal.id ? newExpense : e);
+      newData.sort((a, b) => {
+        if (a.date === '일자 미지정') return 1;
+        if (b.date === '일자 미지정') return -1;
+        return a.date.localeCompare(b.date);
+      });
+      syncToCloud({ expenses: newData });
+    } else {
+      // 신규 내역 추가 시 (동시입력 방어)
+      const docRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'trip_data', 'main');
+      setIsCloudSyncing(true);
+      updateDoc(docRef, {
+        expenses: arrayUnion(newExpense)
+      }).finally(() => setIsCloudSyncing(false));
+    }
+    
     setExpenseModal({ isOpen: false, id: null, payer: 'MJ', category: '식음료', date: '', title: '', amount: '', currency: 'CNY', exchangeRate: DEFAULT_CNY_RATE, customRate: false, note: '', included: [...MEMBERS] });
   };
 
@@ -329,9 +349,17 @@ const ChengduTripApp = () => {
     setConfirmModal({
       isOpen: true, message: '이 지출 내역을 삭제하시겠습니까?',
       onConfirm: () => {
-        const newData = expenses.filter(e => e.id !== id);
-        syncToCloud({ expenses: newData });
-        setConfirmModal({ isOpen: false, message: '', onConfirm: null });
+        const expenseToDelete = expenses.find(e => e.id === id);
+        if (expenseToDelete) {
+          const docRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'trip_data', 'main');
+          setIsCloudSyncing(true);
+          updateDoc(docRef, {
+            expenses: arrayRemove(expenseToDelete)
+          }).finally(() => {
+            setIsCloudSyncing(false);
+            setConfirmModal({ isOpen: false, message: '', onConfirm: null });
+          });
+        }
       }
     });
   };
