@@ -142,9 +142,8 @@ const ChengduTripApp = () => {
         if (data.essentials) setEssentials(data.essentials);
         if (data.expenses) setExpenses(data.expenses);
         setDbError(''); 
-      } else {
-        setDoc(docRef, { itinerary: defaultItinerary, essentials: defaultEssentials, expenses: [] }, { merge: true });
       }
+      // else 구문의 무조건적인 setDoc 삭제 (초기화 덮어쓰기 원천 차단)
       setIsCloudSyncing(false);
     }, (error) => {
       setDbError("연결 실패: 데이터베이스 권한을 확인하세요.");
@@ -161,9 +160,20 @@ const ChengduTripApp = () => {
     try {
       setIsCloudSyncing(true);
       const docRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'trip_data', 'main');
-      await setDoc(docRef, updateData, { merge: true });
+      // setDoc 대신 updateDoc 사용 (기존 데이터를 날리지 않음)
+      await updateDoc(docRef, updateData);
       setDbError('');
-    } catch (error) { setDbError("저장 권한 없음"); } finally { setIsCloudSyncing(false); }
+    } catch (error) { 
+      // 문서가 아예 없는 초기 상태일 때만 재생성
+      if (error.code === 'not-found') {
+        const docRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'trip_data', 'main');
+        await setDoc(docRef, { itinerary: defaultItinerary, essentials: defaultEssentials, expenses: [] }, { merge: true });
+      } else {
+        setDbError("저장 권한 없음 또는 네트워크 오류"); 
+      }
+    } finally { 
+      setIsCloudSyncing(false); 
+    }
   };
 
   const getEventDateObj = (dateText, timeStr) => {
