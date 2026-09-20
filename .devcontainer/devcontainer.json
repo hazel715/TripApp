@@ -1,0 +1,19 @@
+{
+  "name": "TripApp Dev Container",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "editor.formatOnSave": true
+      },
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ritwickdey.LiveServer"
+      ]
+    }
+  },
+  "forwardPorts": [5500]
+}
