@@ -4,24 +4,34 @@
 
 ## 정의
 
-한 Project에서 선택된 지출 집합을 기준 통화로 닫는 사건.
+한 Project의 **현재 ledger**를 기준 통화로 닫는 사건. Project 전체의 시점 마감이다.
 
-레거시 `calculateSettlement()`는 **조회 시점 계산**이다. 저장·완료 상태가 없다. 신규는 계산과 기록을 분리한다.
+개별 Expense의 상태가 아니다. 선택된 지출 집합을 묶지 않는다. Expense에 `settlement_id`를 두지 않는다.
+
+레거시 `calculateSettlement()`는 **조회 시점 계산**이다. 저장·완료 상태가 없다. 신규는 계산과 기록(`settlements` / `settlement_transfers`)을 분리한다.
+
+목적은 특정 Expense에 정산 플래그를 붙이는 것이 아니라, 그 순간 Project 정산이 완료되었음을 기록하는 것이다.
 
 ## 상태
 
+Project **현재** 상태 (`projects.settlement_status`):
+
 | 상태 | 의미 |
 | --- | --- |
-| `preview` | 저장하지 않은 계산 결과 (API 응답) |
-| `open` | 확정됨. 송금이 남아 있을 수 있음 |
-| `closed` | 모든 Transfer가 완료로 표시됨 |
+| `open` | 현재 ledger가 마감되지 않음 (미정산) |
+| `settled` | 현재 ledger 기준으로 정산이 확정됨 |
 
-MVP는 `preview`와 즉시 `closed`(송금은 오프라인으로 했다고 가정)만 둬도 된다. `open` + 건별 체크는 2차.
+API `preview`는 저장하지 않은 계산 결과일 뿐, Project 상태가 아니다.
 
-## 포함 지출
+정산 확정 후 Expense가 생성/수정/삭제되면 기존 마감은 최신이 아니다. Project는 다시 `open`. 과거 `settlements` 행은 이력으로 유지한다.
 
-- 기본: `settlement_id IS NULL`인 지출 전부
-- 한 지출은 최대 한 Settlement에 속한다
+송금 리마인더, 원클릭 정산, 배치 정산 UX는 이 문서에서 정하지 않는다. transfer 건별 완료 체크(`is_paid`) 1차 사용도 미정.
+
+## 범위
+
+- 대상은 해당 Project의 현재 지출 전체 (ledger)
+- Expense를 Settlement에 포함/제외하지 않음
+- 동시성은 Project 행 lock + 트랜잭션. 지출을 `settlement_id IS NULL`로 잠그지 않음
 
 ## 집계 의미
 
@@ -32,6 +42,8 @@ MVP는 `preview`와 즉시 `closed`(송금은 오프라인으로 했다고 가�
 - **balance** = paid − owed  
   - 양수: 받을 돈 (채권자)  
   - 음수: 보낼 돈 (채무자)
+
+환산은 각 Expense에 스냅샷된 `fx_rate`만 사용한다. `fx_quotes`를 조인해 다시 곱하지 않는다.
 
 레거시 변수명 `spent`는 “소비액/부담액”이다. 신규 문서에서는 `owed`를 쓴다.
 
