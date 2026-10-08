@@ -1,61 +1,37 @@
 # 정산 알고리즘
 
-의미는 [../domain/settlement.md](../domain/settlement.md). 반올림은 [rounding-rules.md](./rounding-rules.md). 구현은 Domain `calculation`, UI/SQL 아님.
+의미는 [../domain/settlement.md](../domain/settlement.md). 구현은 Domain. UI/SQL 아님.
 
-## 레거시 원본
+## 현재 부담 현황
 
-`app.jsx` `calculateSettlement` 약 392–407행. 표시 약 690–698행.
-
-```
-paid, spent, balances = {MJ:0, JY:0, HJ:0}
-for each expense:
-  amt = getConvertedAmount(exp)          # Math.round된 KRW number
-  paid[payer] += amt
-  balances[payer] += amt
-  splitAmt = amt / included.length       # float
-  for person in included:
-    spent[person] += splitAmt
-    balances[person] -= splitAmt
-
-debtors = balances[p] <= -1
-creditors = balances[p] >= 1
-sort desc, greedy min, transfer amount = round(pay)
-```
-
-문제: 멤버 3명 고정, float 나눗셈, 정산 미저장, `|balance|<1`을 float에 적용.
-
-발견한 **다른 정산 규칙**(통화별 별도 송금, 정산일 재평가, 수수료)은 없다. 환산 후 한 통화로 닫는다.
-
-## 신규 (정수 greedy)
-
-입력: 이미 기준 통화 **정수** minor인 지출 목록 + 스냅샷 환산 완료분.
-
-1. 지출마다 결제 총액을 한 번 convert.
-2. `splitEqual`로 부담액 (정수).
-3. `paid[payer] += convertedTotal`, `owed[member] += share`.
-4. `balance = paid - owed`.
-5. `|balance| < 1` minor → 0 (KRW·JPY는 1원/1엔, USD는 1센트).
-6. 채무자/채권자 절댓값 내림차순, `min`으로 transfer. 추가 반올림 없음.
-
-ILP 최소 송금 수는 요구하지 않는다. 레거시 greedy의 정수화다.
-
-함수는 ORM/React 타입을 import하지 않는다.
+저장·송금 없이 집계만 한다.
 
 ```
-accumulateBalances(items) -> { paid, owed, balance } per member
-planTransfers(balanceMap) -> { transfers, remainder }
+paid[user] += expense.settlement_amount   if payer
+shareTotal[user] += share.share_amount
+difference[user] = paid - shareTotal
 ```
 
-`remainder` 처리(무시 vs 최대 채권자 흡수)는 [결정 필요 사항](#결정-필요-사항).
+이 화면에서 transfers를 계산하지 않는다.
 
-## 환전 후 정산
+## 최종 정산 — 최소 송금 횟수
 
-항상 기준 통화로 변환한 다음 정산한다. 통화별 송금 모드는 없음.
+입력: 사용자별 `balance` (difference와 동일). 합은 0.
 
-시세 테이블이 아니라 각 지출 스냅샷만 사용한다.
+0에 가까운 잔액(스케일 4에서 0)은 제외한다.
 
-## 결정 필요 사항
+소규모 인원(일반적인 여행/모임)을 전제로, 부분집합 합이 0이 되는 분할을 최대화한다.
 
-1. `remainder` 흡수 여부.
-2. 정산에 포함할 지출 집합 (미정산 전부 vs 선택).
-3. 멤버 중 지출에 한 번도 안 나온 사람을 0행으로 넣을지.
+```
+n = 0이 아닌 잔액 인원 수
+maxZeroGroups = 잔액 합이 0인 서로소 부분집합의 최대 개수
+minTransfers = n - maxZeroGroups
+```
+
+각 영합 그룹 안에서 채무자→채권자 매칭으로 실제 송금 행을 만든다. 그룹 크기 k이면 송금 k-1건.
+
+Greedy 전체 매칭만으로 끝내지 않는다. 예: 이미 상쇄되는 부분 그룹이 있으면 그 그룹을 먼저 닫아 횟수를 줄인다.
+
+음수 Expense/Share가 있어도 같은 잔액 정의로 처리한다.
+
+결과를 DB에 쓰지 않는다.

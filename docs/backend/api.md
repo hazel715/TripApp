@@ -1,64 +1,61 @@
-# API (제안)
+# API
 
 서버 구조는 [service-architecture.md](./service-architecture.md). 계산은 HTTP 뒤에서도 domain 계산을 호출한다.
 
-인증은 모든 Project 스코프 리소스에 멤버십 검사를 전제로 한다. **인증 방식은 미정.**
+인증: Passwordless email + PostgreSQL session cookie. Project 스코프 리소스는 멤버십을 검사한다.
 
-Command/CRUD는 HTTP request-response. 변경이 commit된 뒤에 realtime으로 동기화한다. realtime 구현 기술은 미정.
+Command/CRUD는 HTTP. 변경이 commit된 뒤에 SSE로 “데이터 변경됨”을 알린다. 화면 강제 refresh는 하지 않는다.
+
+Base path: `/api`.
+
+## Auth
+
+- `POST /api/auth/login-link` `{ email }` — one-time link 발송
+- `POST /api/auth/verify` `{ token }` — 1회 검증 후 session 발급
+- `GET /api/auth/me`
+- `POST /api/auth/logout`
 
 ## Projects
 
-- `POST /projects`
-- `GET /projects`
-- `GET /projects/:id`
-- `PATCH /projects/:id`
-- `POST /projects/:id/members`
-- `PATCH /projects/:id/members/:memberId` (닉네임, is_active)
+- `GET /api/projects`
+- `POST /api/projects` `{ name, defaultExpenseCurrency, settlementCurrency }`
+- `GET /api/projects/:id`
+- `POST /api/projects/:id/members` `{ email, role?, displayName? }`
+- `DELETE /api/projects/:id/members/:userId`
 
-목록·상세 응답에 현재 `settlement_status` (`open` | `settled`)를 포함한다.
+Settlement 전용 CRUD API는 없다.
+
+- `GET /api/projects/:id/balances` — 현재 부담 현황 (송금 목록 없음)
+- `GET /api/projects/:id/settlement` — 최종 정산 + 최소 송금 횟수 결과 (명시적 조회)
 
 ## Categories
 
 전역. Project 스코프가 아니다.
 
-- `GET /categories`
-- `POST /categories`
+- `GET /api/categories`
+- `POST /api/categories` `{ name }`
 
 ## Expenses
 
-- `GET /projects/:id/expenses?groupBy=expenseDate|payer|category`
-- `POST /projects/:id/expenses`
-- `PATCH /projects/:id/expenses/:expenseId`
-- `DELETE /projects/:id/expenses/:expenseId`
-- `POST /projects/:id/expenses/quick-memo` body `{ text }` — 파싱은 서버/core
+- `GET /api/projects/:id/expenses`
+- `POST /api/projects/:id/expenses`
+- `PATCH /api/projects/:id/expenses/:expenseId`
+- `DELETE /api/projects/:id/expenses/:expenseId`
+- `POST /api/projects/:id/expenses/quick-memo` `{ text }` — Application이 파싱·검증
 
-생성 body는 amount, 참여자, share를 받는다. share를 생략하면 equal split이 기본값이다. share를 보내면 그 값이 저장된다. 합 = `amount_minor`.
+생성 body: `description`, `amount`, `currency`, `settlementAmount`, `settlementCurrency`, `fxRate`, `payerUserId`, `categoryId`, `expenseDate`, `shares` 또는 `participantUserIds`(균등 분할 기본값).
 
-응답의 `amountBaseMinor`는 서버가 채운다. 클라이언트가 합계의 원천이 아니다. 그룹 합계는 서버가 내려주거나, core로 클라이언트 재계산하되 **동일 함수**여야 한다.
+Share를 보내면 그 값이 저장된다. 합 = `settlementAmount`.
 
-생성/수정/삭제가 성공하면 해당 Project `settlement_status`는 `open`. Project가 `settled`여도 Expense 변경을 409로 거절하지 않는다.
+closed Project여도 Expense 변경을 거절하지 않는다. 성공 시 Project는 `active`.
 
-적용 환율은 이 요청에서 스냅샷한다. 기본 시세가 있어도 persist 값으로 고정한다. 수동 rate override 가능.
+## Realtime
 
-## FX
-
-- `GET /projects/:id/fx-defaults`
-- `PUT /projects/:id/fx-defaults`
-
-1차에 시세 API 프록시 없음. 기본값은 `ManualFxQuote` / `fx_quotes`. 여기 값을 바꿔도 기존 Expense `fx_rate`는 바꾸지 않는다.
-
-## Settlement
-
-Project 현재 ledger의 마감. 지출에 settlement FK를 쓰지 않는다.
-
-- `POST /projects/:id/settlements/preview` — 현재 Project ledger 기준 계산 결과. DB 미기록
-- `POST /projects/:id/settlements` — 확정. settlement 이력 저장, Project `settlement_status = settled`
-- `GET /projects/:id/settlements` — 마감 이력
-
-레거시에 REST가 없다. Firestore `updateDoc`/`arrayUnion`/`arrayRemove`/`onSnapshot`이 전부다. 신규는 그 패턴을 재현하지 않는다.
+- `GET /api/projects/:id/events` — SSE. `project.changed` 등 변경 알림
 
 ## 에러
 
-- 400 검증 (빈 참여자, amount≤0, share 합 ≠ amount)
-- 409 실제 동시성/충돌 (예: 같은 Project lock 하에서 정산 확정과 지출 변경이 경합해 한쪽이 실패한 경우)
+- 400 검증 (금액 0, share 합 불일치, 빈 설명 등)
+- 401 미인증
 - 403 비멤버
+- 404 없음

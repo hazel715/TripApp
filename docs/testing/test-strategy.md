@@ -1,26 +1,14 @@
 # 테스트 전략
 
-케이스 숫자는 [calculation-cases.md](./calculation-cases.md). 인수 시나리오는 [acceptance-tests.md](./acceptance-tests.md).
-
-## 레거시
-
-테스트 파일, 테스트 러너, CI 없음.
+러너: Vitest. 레거시에는 테스트가 없었다.
 
 ## 피라미드
 
-1. **ledger-core 단위 테스트** (최우선)  
-   변환, 균등 분할, 정산 greedy, 퀵메모 파서.
-2. **API 통합**  
-   지출 CRUD, 정산 확정 트랜잭션, 권한.
-3. **E2E 소수**  
-   지출 추가 → 정산 미리보기.
+1. **Domain/Application 단위** (최우선)  
+   Expense CRUD 규칙, Share 합, 음수, payer≠participant, closed→active, member role, global category, 부담 현황, 최소 송금, Quick Memo 파서.
+2. **API**  
+   주요 endpoint 정상/실패. DB 없이 in-memory adapter로 검증 가능하게 둔다.
+3. **E2E**  
+   MVP에서는 필수 자동화 범위가 아니다. 수동 흐름은 [acceptance-tests.md](./acceptance-tests.md).
 
-UI에서 금액을 계산하는 테스트는 만들지 않는다. 표시 포맷(`MM-DD`, `toLocaleString`)만 컴포넌트 테스트.
-
-## 회귀 방법
-
-레거시 함수를 그대로 복사한 fixture로 “구버전 결과”를 남길 수 있다. 정수 분배로 바뀌는 케이스는 구버전과 다를 수 있음을 명시하고 신버전만 assert한다.
-
-## 돈 타입
-
-테스트에서 `number` 0.1 합을 쓰지 않는다. `bigint` minor.
+테스트에서 `0.1 + 0.2` 같은 IEEE float 합을 쓰지 않는다. Decimal 문자열을 비교한다.

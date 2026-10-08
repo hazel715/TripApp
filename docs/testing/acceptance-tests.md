@@ -1,39 +1,37 @@
 # 인수 테스트
 
-계산 숫자 assert는 [calculation-cases.md](./calculation-cases.md). 여기는 사용자 시나리오.
+## A1 로그인과 Project
 
-## A1 새 Project 가계부
+Given 이메일로 login link를 받는다  
+When verify하면  
+Then session이 발급되고 Project를 만들 수 있다.
 
-Given 사용자 3명이 로그인되어 있다  
-When Project “장보기 1”을 만들고 지출 2건을 서로 다른 결제자로 넣는다  
-Then 목록 총액이 두 건의 기준통화 환산 합과 같다  
-And 정산 미리보기에 송금이 1건 이상 또는 0건(이미 균형)으로 일관된다.
+## A2 지출과 Share
 
-## A2 날짜 저장/표시 분리
+When settlement_amount와 share 합이 다르면  
+Then 저장되지 않는다.  
+When 같으면  
+Then 목록에 보이고 현황에 반영된다.
 
-When 지출일을 2026-09-10으로 저장한다  
-Then DB `occurred_on`은 date `2026-09-10`이다  
-And UI는 `09-10` 또는 `9월 10일`로 보여도 된다  
-And 연도 없는 문자열만 저장되지 않는다.
+## A3 현황 vs 최종 정산
 
-## A3 환율 스냅샷
+When 현황만 열면  
+Then 송금 목록이 없다.  
+When 최종 정산 보기를 누르면  
+Then 최소 송금 목록이 보인다.
 
-Given CNY 기본율 188.50  
-When 지출을 커스텀 200으로 저장한 뒤 기본율을 190으로 바꾼다  
-Then 해당 지출 환산액은 200 기준 그대로다.
+## A4 closed 재오픈
 
-## A4 정산 확정 후 격리
-
-When 미정산 지출을 확정한다  
-And 새 지출을 추가한다  
-Then 두 번째 미리보기에는 새 지출만 포함된다.
+Given Project가 closed  
+When Expense를 수정하면  
+Then status는 active.
 
 ## A5 여행 기능 부재
 
-When 앱을 연다  
-Then 일정 탭, 숙소 요약, 준비물, 지도 링크가 없다.
+When 신규 web을 연다  
+Then 일정/준비물/지도가 없다.
 
 ## A6 권한
 
-When 비멤버가 지출 POST를 한다  
+When 비멤버가 지출 POST를 하면  
 Then 403.

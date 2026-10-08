@@ -1,33 +1,17 @@
 # Currency
 
-환율 적용은 [exchange-rate.md](./exchange-rate.md), 변환 공식은 [../calculation/currency-conversion.md](../calculation/currency-conversion.md).
+환율 적용은 [exchange-rate.md](./exchange-rate.md).
 
 ## 정의
 
-ISO 4217 코드와 최소 단위(minor unit) 메타데이터. 환율 값이 아니다.
+ISO 4217 코드 `CHAR(3)`. 별도의 currencies 테이블은 MVP에 두지 않는다. 코드 형식을 Domain에서 검증한다.
 
-## 1차 지원
+금액 저장은 통화별 minor 정수가 아니라 `NUMERIC(18,4)` 다.
 
-| code | 이름 | minor digits | 레거시 |
-| --- | --- | --- | --- |
-| KRW | 원 | 0 (1원) | 있음, 환율 1 |
-| CNY | 위안 | 2 | 있음, 기본 188.50 KRW |
-| USD | 달러 | 2 | 있음, 기본 1385.00 KRW |
-
-레거시는 통화를 select 3개로 하드코딩한다. 모델/테이블이 없다.
-
-## 금액 저장
-
-UI는 `300`, `10.50`처럼 보여도 DB는 `amountMinor`만 저장한다.
-
-- KRW 300 → 300
-- CNY 300.00 → 30000
-- USD 10.50 → 1050
-
-레거시는 `parseFloat(amount)` 후 `amount * rate`를 JS number로 한다. 신규는 이 방식을 쓰지 않는다.
+지원 통화를 세 개로 하드코딩하지 않는다. UI는 KRW / CNY / USD를 빠르게 고를 수 있게 두고, 다른 코드도 입력 가능하다.
 
 ## 기준 통화
 
-Project.baseCurrency. MVP는 KRW만 사용하더라도 컬럼은 둔다.
+Project `settlement_currency`가 정산 기준이다. `default_expense_currency`는 지출 입력 기본값이다.
 
-표시 금액은 항상 기준 통화로 합산한다. 레거시 목록의 `toLocaleString()원`과 같다.
+Expense는 두 값을 행에 저장할 수 있고, 입력 시 override 가능하다.

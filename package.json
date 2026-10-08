@@ -1,0 +1,26 @@
+{
+  "name": "tripapp",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "domain",
+    "application",
+    "infrastructure",
+    "api",
+    "web"
+  ],
+  "scripts": {
+    "install:all": "npm install",
+    "typecheck": "npm run typecheck -w @tripapp/domain && npm run typecheck -w @tripapp/application && npm run typecheck -w @tripapp/infrastructure && npm run typecheck -w @tripapp/api && npm run typecheck -w @tripapp/web",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "build": "npm run build -w @tripapp/domain && npm run build -w @tripapp/application && npm run build -w @tripapp/infrastructure && npm run build -w @tripapp/api && npm run build -w @tripapp/web",
+    "dev:api": "npm run dev -w @tripapp/api",
+    "dev:web": "npm run dev -w @tripapp/web",
+    "db:generate": "npm run drizzle:generate -w @tripapp/infrastructure",
+    "db:migrate": "npm run drizzle:migrate -w @tripapp/infrastructure"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
