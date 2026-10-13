@@ -1,4 +1,4 @@
-import Decimal from "decimal.js";
+import { Decimal } from "decimal.js";
 import { DomainError } from "./errors.ts";
 
 export type FxRate = Decimal;

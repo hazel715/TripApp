@@ -1,3 +1,4 @@
+import { Decimal } from "decimal.js";
 import { DomainError, type Project } from "@tripapp/domain";
 
 export type ParsedQuickMemo = {
@@ -22,8 +23,8 @@ export function parseQuickMemo(text: string, project: Project): ParsedQuickMemo 
     throw new DomainError("INVALID_MEMO", "Quick memo must include an amount");
   }
   let amount = amountMatch[0];
-  if (/만원/.test(raw) && Math.abs(Number(amount)) < 1000) {
-    amount = String(Number(amount) * 10000);
+  if (/만원/.test(raw) && new Decimal(amount).abs().lt(1000)) {
+    amount = new Decimal(amount).times(10000).toString();
   }
 
   let currencyHint: string | null = null;

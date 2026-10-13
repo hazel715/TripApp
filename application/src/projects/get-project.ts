@@ -26,11 +26,12 @@ export async function getProjectBalancesUseCase(
 ) {
   const project = await getProjectUseCase(deps, actor, projectId);
   const expenses = await deps.expenses.listByProject(projectId);
-  return toBurdenStatus(
+  const currencies = [...new Set([project.settlementCurrency, ...expenses.map((expense) => expense.settlementCurrency)])];
+  return currencies.map((currency) => toBurdenStatus(
     expenses,
     project.members.map((m) => m.userId),
-    project.settlementCurrency,
-  );
+    currency,
+  ));
 }
 
 export async function getFinalSettlementUseCase(
@@ -40,9 +41,10 @@ export async function getFinalSettlementUseCase(
 ) {
   const project = await getProjectUseCase(deps, actor, projectId);
   const expenses = await deps.expenses.listByProject(projectId);
-  return computeFinalSettlement(
+  const currencies = [...new Set([project.settlementCurrency, ...expenses.map((expense) => expense.settlementCurrency)])];
+  return currencies.map((currency) => computeFinalSettlement(
     expenses,
     project.members.map((m) => m.userId),
-    project.settlementCurrency,
-  );
+    currency,
+  ));
 }

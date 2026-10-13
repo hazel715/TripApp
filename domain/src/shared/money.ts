@@ -1,4 +1,4 @@
-import Decimal from "decimal.js";
+import { Decimal } from "decimal.js";
 import { DomainError } from "./errors.ts";
 
 Decimal.set({ precision: 40, rounding: Decimal.ROUND_HALF_UP });

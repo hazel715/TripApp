@@ -1,4 +1,4 @@
-import Decimal from "decimal.js";
+import { Decimal } from "decimal.js";
 import { DomainError } from "../shared/errors.ts";
 import { assertCurrencyCode } from "../shared/currency.ts";
 import { parseFxRate, type FxRate } from "../shared/fx-rate.ts";
@@ -42,6 +42,15 @@ export type ExpenseDraft = {
 };
 
 export function assembleExpense(draft: ExpenseDraft, project: Project): Expense {
+  if (draft.projectId !== project.id) {
+    throw new DomainError("INVALID_PROJECT", "Expense project must match its parent project");
+  }
+  if (draft.expenseDate !== null) {
+    const parsed = new Date(`${draft.expenseDate}T00:00:00Z`);
+    if (!Number.isFinite(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== draft.expenseDate) {
+      throw new DomainError("INVALID_DATE", "expense_date must be a valid calendar date");
+    }
+  }
   const description = draft.description.trim();
   if (!description) {
     throw new DomainError("INVALID_EXPENSE", "Description is required");

@@ -1,4 +1,4 @@
-import Decimal from "decimal.js";
+import { Decimal } from "decimal.js";
 import { Money } from "../shared/money.ts";
 import type { Expense } from "./expense.ts";
 
@@ -70,7 +70,7 @@ export function toBurdenStatus(
   memberUserIds: string[],
   currency: string,
 ): BurdenStatus {
-  const map = accumulateBurden(expenses, memberUserIds);
+  const map = accumulateBurden(expenses.filter((expense) => expense.settlementCurrency === currency), memberUserIds);
   const rows: BurdenRow[] = [...map.entries()].map(([userId, row]) => {
     const paid = Money.of(row.paid);
     const shareTotal = Money.of(row.shareTotal);
@@ -134,37 +134,32 @@ function maxZeroSumGroups(balances: Decimal[]): { count: number; groups: number[
     sums[mask] = sums[mask ^ bit].plus(balances[i]);
   }
 
-  const dp = new Array<number>(size).fill(0);
+  // Every ordering earns one group each time its prefix sums to zero.
+  // Maximizing these boundaries gives the maximum zero-sum partition.
+  const dp = new Int16Array(size);
+  const parent = new Int32Array(size);
   for (let mask = 1; mask < size; mask += 1) {
-    if (!sums[mask].isZero()) continue;
-    dp[mask] = 1;
-    for (let sub = mask; sub; sub = (sub - 1) & mask) {
-      if (sums[sub].isZero() && dp[sub] + dp[mask ^ sub] > dp[mask]) {
-        dp[mask] = dp[sub] + dp[mask ^ sub];
+    for (let bits = mask; bits; bits &= bits - 1) {
+      const bit = bits & -bits;
+      const candidate = dp[mask ^ bit] + (sums[mask].isZero() ? 1 : 0);
+      if (candidate > dp[mask]) {
+        dp[mask] = candidate;
+        parent[mask] = bit;
       }
     }
   }
-
   const groups: number[] = [];
-  const reconstruct = (mask: number) => {
-    if (mask === 0) return;
-    if (dp[mask] <= 1) {
-      groups.push(mask);
-      return;
+  let mask = size - 1;
+  let group = 0;
+  while (mask) {
+    const bit = parent[mask] || (mask & -mask);
+    group |= bit;
+    mask ^= bit;
+    if (sums[mask].isZero()) {
+      groups.push(group);
+      group = 0;
     }
-    let found = false;
-    for (let sub = mask; sub; sub = (sub - 1) & mask) {
-      if (sub !== mask && sums[sub].isZero() && dp[sub] + dp[mask ^ sub] === dp[mask]) {
-        reconstruct(sub);
-        reconstruct(mask ^ sub);
-        found = true;
-        break;
-      }
-    }
-    if (!found) groups.push(mask);
-  };
-  reconstruct(size - 1);
-  return { count: dp[size - 1] || 1, groups };
+  }  return { count: dp[size - 1] || 1, groups };
 }
 
 export function planMinTransfers(
@@ -173,7 +168,14 @@ export function planMinTransfers(
   const nodes: Node[] = balances
     .filter((row) => !row.balance.isZero())
     .map((row) => ({ userId: row.userId, balance: row.balance.value }));
+  const total = nodes.reduce((sum, node) => sum.plus(node.balance), new Decimal(0));
+  if (!total.isZero()) throw new Error("Balance total must be 0");
+  if (new Set(balances.map((row) => row.userId)).size !== balances.length) {
+    throw new Error("Duplicate balance user");
+  }
   if (nodes.length === 0) return [];
+  // Explicit operational bound: never return an approximate plan above it.
+  if (nodes.length > 20) throw new Error("Exact settlement supports at most 20 nonzero balances per currency");
 
   const { groups } = maxZeroSumGroups(nodes.map((n) => n.balance));
   const transfers: Transfer[] = [];
