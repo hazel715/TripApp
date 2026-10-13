@@ -35,3 +35,5 @@ Checkpoint: Domain tests 23/23 passed; Domain build and Application typecheck pa
 Persistence checkpoint: nine Drizzle tables and generated SQL migration exist. PostgreSQL repositories share an AsyncLocalStorage transaction; project writes lock the parent. Auth consumption is conditional UPDATE RETURNING inside the login transaction. Actual PostgreSQL integration still pending (Docker is not on PATH).
 
 API checkpoint: Fastify auth/projects/expenses/categories and authenticated SSE connected. API/Application memory integration tests verify CRUD, share mismatch, negative values, rollback, reopen, no notification before commit and one-time concurrent verification. Domain+API: 27 tests passed; API typecheck passed. PostgreSQL/Docker executables unavailable on PATH.
+
+Web checkpoint: React login, project list/create, owner member controls, global category creation, Expense CRUD/equal split/custom shares, server memo preview, currency-grouped burden and explicit final settlement implemented. SSE only sets a notification flag. Web typecheck passed.
