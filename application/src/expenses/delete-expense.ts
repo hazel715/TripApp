@@ -1,4 +1,8 @@
-import { reopenProjectIfClosed, requireMember, type User } from "@tripapp/domain";
+import {
+  reopenProjectIfClosed,
+  requireMember,
+  type User,
+} from "@tripapp/domain";
 import type { ExpenseWriteDeps } from "./create-expense.ts";
 
 export async function deleteExpenseUseCase(

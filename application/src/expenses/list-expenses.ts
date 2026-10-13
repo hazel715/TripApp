@@ -1,4 +1,9 @@
-import { requireMember, type ExpenseRepository, type ProjectRepository, type User } from "@tripapp/domain";
+import {
+  requireMember,
+  type ExpenseRepository,
+  type ProjectRepository,
+  type User,
+} from "@tripapp/domain";
 
 export async function listExpensesUseCase(
   deps: { projects: ProjectRepository; expenses: ExpenseRepository },

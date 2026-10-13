@@ -31,11 +31,15 @@ export async function updateExpenseUseCase(
     }
 
     const now = deps.clock.now();
-    const settlementAmount = input.settlementAmount ?? existing.settlementAmount.toString();
+    const settlementAmount =
+      input.settlementAmount ?? existing.settlementAmount.toString();
     const shares =
       input.shares ??
       (input.participantUserIds
-        ? splitSettlementAmount(Money.of(settlementAmount), input.participantUserIds).map((s) => ({
+        ? splitSettlementAmount(
+            Money.of(settlementAmount),
+            input.participantUserIds,
+          ).map((s) => ({
             userId: s.userId,
             shareAmount: s.shareAmount.toString(),
           }))
@@ -49,17 +53,24 @@ export async function updateExpenseUseCase(
         id: existing.id,
         projectId: project.id,
         payerUserId: input.payerUserId ?? existing.payerUserId,
-        categoryId: input.categoryId === undefined ? existing.categoryId : input.categoryId,
+        categoryId:
+          input.categoryId === undefined
+            ? existing.categoryId
+            : input.categoryId,
         description: input.description ?? existing.description,
         amount: input.amount ?? existing.amount.toString(),
         currency: input.currency ?? existing.currency,
         fxRate:
           input.fxRate === undefined
-            ? existing.fxRate?.toString() ?? null
+            ? (existing.fxRate?.toString() ?? null)
             : input.fxRate,
         settlementAmount,
-        settlementCurrency: input.settlementCurrency ?? existing.settlementCurrency,
-        expenseDate: input.expenseDate === undefined ? existing.expenseDate : input.expenseDate,
+        settlementCurrency:
+          input.settlementCurrency ?? existing.settlementCurrency,
+        expenseDate:
+          input.expenseDate === undefined
+            ? existing.expenseDate
+            : input.expenseDate,
         shares,
         createdAt: existing.createdAt,
         updatedAt: now,

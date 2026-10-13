@@ -56,9 +56,13 @@ export async function createExpenseUseCase(
     const now = deps.clock.now();
     const shares =
       input.shares ??
-      splitSettlementAmount(Money.of(input.settlementAmount), input.participantUserIds ?? []).map(
-        (s) => ({ userId: s.userId, shareAmount: s.shareAmount.toString() }),
-      );
+      splitSettlementAmount(
+        Money.of(input.settlementAmount),
+        input.participantUserIds ?? [],
+      ).map((s) => ({
+        userId: s.userId,
+        shareAmount: s.shareAmount.toString(),
+      }));
 
     const expense = assembleExpense(
       {
