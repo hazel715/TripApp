@@ -33,3 +33,5 @@ Baseline: de799630a0e928bf5bc729ebc027c216273cf661 (feature/refactory)
 Checkpoint: Domain tests 23/23 passed; Domain build and Application typecheck passed. Fixed Decimal imports, TypeScript relative import rewriting, calendar dates, cross-project drafts, decimal memo scaling, currency-isolated totals and exact O(n*2^n) zero-partition DP. Auth transaction and application adapter tests remain for persistence/API phases.
 
 Persistence checkpoint: nine Drizzle tables and generated SQL migration exist. PostgreSQL repositories share an AsyncLocalStorage transaction; project writes lock the parent. Auth consumption is conditional UPDATE RETURNING inside the login transaction. Actual PostgreSQL integration still pending (Docker is not on PATH).
+
+API checkpoint: Fastify auth/projects/expenses/categories and authenticated SSE connected. API/Application memory integration tests verify CRUD, share mismatch, negative values, rollback, reopen, no notification before commit and one-time concurrent verification. Domain+API: 27 tests passed; API typecheck passed. PostgreSQL/Docker executables unavailable on PATH.
