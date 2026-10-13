@@ -37,3 +37,15 @@ describe("Quick Memo", () => {
     expect(() => parseQuickMemo("점심 0 민수", project)).toThrow();
   });
 });
+
+it.each(["점심 12 USD 철수", "점심 $12 철수"])(
+  "preserves currency memo input: %s",
+  (text) => {
+    expect(parseQuickMemo(text, project)).toMatchObject({
+      description: "점심",
+      amount: "12",
+      currencyHint: "USD",
+      participantUserIds: ["b"],
+    });
+  },
+);

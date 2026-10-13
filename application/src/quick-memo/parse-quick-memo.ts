@@ -18,12 +18,12 @@ export function parseQuickMemo(
 ): ParsedQuickMemo {
   const raw = text.trim();
   const match = raw.match(
-    /(?:^|\s)(-?\d+(?:\.\d+)?)(만원|원|위안|달러|USD|KRW|CNY)?(?=\s|$)/i,
+    /(?:^|\s)(\$)?(-?\d+(?:\.\d+)?)(?:\s*(만원|원|위안|달러|USD|KRW|CNY|\$))?(?=\s|$)/i,
   );
   if (!match)
     throw new DomainError("INVALID_MEMO", "Quick memo must include an amount");
-  const suffix = match[2]?.toLowerCase();
-  const value = new Decimal(match[1]).times(suffix === "만원" ? 10000 : 1);
+  const suffix = match[3]?.toLowerCase() ?? (match[1] ? "$" : undefined);
+  const value = new Decimal(match[2]).times(suffix === "만원" ? 10000 : 1);
   const amount = Money.of(value);
   assertNonZero(amount, "amount");
   const rest = raw.replace(match[0], " ").trim().split(/\s+/).filter(Boolean);
@@ -50,6 +50,7 @@ export function parseQuickMemo(
         cny: "CNY",
         달러: "USD",
         usd: "USD",
+        $: "USD",
       }[suffix] ?? null)
     : null;
   return {
