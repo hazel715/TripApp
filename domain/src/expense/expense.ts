@@ -41,14 +41,26 @@ export type ExpenseDraft = {
   updatedAt: Date;
 };
 
-export function assembleExpense(draft: ExpenseDraft, project: Project): Expense {
+export function assembleExpense(
+  draft: ExpenseDraft,
+  project: Project,
+): Expense {
   if (draft.projectId !== project.id) {
-    throw new DomainError("INVALID_PROJECT", "Expense project must match its parent project");
+    throw new DomainError(
+      "INVALID_PROJECT",
+      "Expense project must match its parent project",
+    );
   }
   if (draft.expenseDate !== null) {
     const parsed = new Date(`${draft.expenseDate}T00:00:00Z`);
-    if (!Number.isFinite(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== draft.expenseDate) {
-      throw new DomainError("INVALID_DATE", "expense_date must be a valid calendar date");
+    if (
+      !Number.isFinite(parsed.getTime()) ||
+      parsed.toISOString().slice(0, 10) !== draft.expenseDate
+    ) {
+      throw new DomainError(
+        "INVALID_DATE",
+        "expense_date must be a valid calendar date",
+      );
     }
   }
   const description = draft.description.trim();
@@ -57,6 +69,15 @@ export function assembleExpense(draft: ExpenseDraft, project: Project): Expense 
   }
   const amount = Money.of(draft.amount);
   const settlementAmount = Money.of(draft.settlementAmount);
+  if (
+    amount.abs().value.gte("100000000000000") ||
+    settlementAmount.abs().value.gte("100000000000000")
+  ) {
+    throw new DomainError(
+      "INVALID_MONEY",
+      "Stored amount exceeds NUMERIC(18,4)",
+    );
+  }
   assertNonZero(amount, "amount");
   assertNonZero(settlementAmount, "settlement_amount");
 
@@ -74,8 +95,14 @@ export function assembleExpense(draft: ExpenseDraft, project: Project): Expense 
     );
   }
 
-  if (draft.expenseDate !== null && !/^\d{4}-\d{2}-\d{2}$/.test(draft.expenseDate)) {
-    throw new DomainError("INVALID_DATE", "expense_date must be YYYY-MM-DD or null");
+  if (
+    draft.expenseDate !== null &&
+    !/^\d{4}-\d{2}-\d{2}$/.test(draft.expenseDate)
+  ) {
+    throw new DomainError(
+      "INVALID_DATE",
+      "expense_date must be YYYY-MM-DD or null",
+    );
   }
 
   if (!findMember(project, draft.payerUserId)) {
@@ -89,13 +116,24 @@ export function assembleExpense(draft: ExpenseDraft, project: Project): Expense 
   const seen = new Set<string>();
   const shares: ExpenseShare[] = draft.shares.map((row) => {
     if (seen.has(row.userId)) {
-      throw new DomainError("DUPLICATE_SHARE", "Each user can appear in shares only once");
+      throw new DomainError(
+        "DUPLICATE_SHARE",
+        "Each user can appear in shares only once",
+      );
     }
     seen.add(row.userId);
     if (!findMember(project, row.userId)) {
-      throw new DomainError("SHARE_USER_NOT_MEMBER", "Share user must be a project member");
+      throw new DomainError(
+        "SHARE_USER_NOT_MEMBER",
+        "Share user must be a project member",
+      );
     }
     const shareAmount = Money.of(row.shareAmount);
+    if (shareAmount.abs().value.gte("100000000000000"))
+      throw new DomainError(
+        "INVALID_MONEY",
+        "Stored share exceeds NUMERIC(18,4)",
+      );
     assertNonZero(shareAmount, "share_amount");
     return { userId: row.userId, shareAmount };
   });
@@ -139,10 +177,15 @@ export function splitSettlementAmount(
 ): ExpenseShare[] {
   const unique = [...new Set(userIds)];
   if (unique.length === 0) {
-    throw new DomainError("SHARES_REQUIRED", "At least one participant is required");
+    throw new DomainError(
+      "SHARES_REQUIRED",
+      "At least one participant is required",
+    );
   }
   const n = unique.length;
-  const unit = Money.of(total.value.div(n).toDecimalPlaces(4, Decimal.ROUND_DOWN));
+  const unit = Money.of(
+    total.value.div(n).toDecimalPlaces(4, Decimal.ROUND_DOWN),
+  );
   const shares: ExpenseShare[] = unique.map((userId) => ({
     userId,
     shareAmount: unit,

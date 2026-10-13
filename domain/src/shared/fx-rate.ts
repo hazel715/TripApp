@@ -3,16 +3,24 @@ import { DomainError } from "./errors.ts";
 
 export type FxRate = Decimal;
 
-export function parseFxRate(input: string | number | Decimal | null | undefined): FxRate | null {
+export function parseFxRate(
+  input: string | number | Decimal | null | undefined,
+): FxRate | null {
   if (input === null || input === undefined || input === "") {
     return null;
   }
   const value = new Decimal(input);
-  if (!value.isFinite() || value.lte(0)) {
-    throw new DomainError("INVALID_FX_RATE", "fx_rate must be a positive number");
+  if (!value.isFinite() || value.lte(0) || value.gte("10000000000")) {
+    throw new DomainError(
+      "INVALID_FX_RATE",
+      "fx_rate must be a positive number",
+    );
   }
   if (value.decimalPlaces() > 8) {
-    throw new DomainError("INVALID_FX_RATE", "fx_rate cannot have more than 8 decimal places");
+    throw new DomainError(
+      "INVALID_FX_RATE",
+      "fx_rate cannot have more than 8 decimal places",
+    );
   }
   return value;
 }

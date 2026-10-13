@@ -1,7 +1,5 @@
 import {
-  computeFinalSettlement,
   requireMember,
-  toBurdenStatus,
   type ExpenseRepository,
   type Project,
   type ProjectRepository,
@@ -17,34 +15,4 @@ export async function getProjectUseCase(
   if (!project) throw new Error("PROJECT_NOT_FOUND");
   requireMember(project, actor.id);
   return project;
-}
-
-export async function getProjectBalancesUseCase(
-  deps: { projects: ProjectRepository; expenses: ExpenseRepository },
-  actor: User,
-  projectId: string,
-) {
-  const project = await getProjectUseCase(deps, actor, projectId);
-  const expenses = await deps.expenses.listByProject(projectId);
-  const currencies = [...new Set([project.settlementCurrency, ...expenses.map((expense) => expense.settlementCurrency)])];
-  return currencies.map((currency) => toBurdenStatus(
-    expenses,
-    project.members.map((m) => m.userId),
-    currency,
-  ));
-}
-
-export async function getFinalSettlementUseCase(
-  deps: { projects: ProjectRepository; expenses: ExpenseRepository },
-  actor: User,
-  projectId: string,
-) {
-  const project = await getProjectUseCase(deps, actor, projectId);
-  const expenses = await deps.expenses.listByProject(projectId);
-  const currencies = [...new Set([project.settlementCurrency, ...expenses.map((expense) => expense.settlementCurrency)])];
-  return currencies.map((currency) => computeFinalSettlement(
-    expenses,
-    project.members.map((m) => m.userId),
-    currency,
-  ));
 }

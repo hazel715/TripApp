@@ -22,7 +22,12 @@ function baseProject() {
   });
   p.members.push(
     { projectId: "p1", userId: "chulsoo", role: "member", displayName: "철수" },
-    { projectId: "p1", userId: "younghee", role: "member", displayName: "영희" },
+    {
+      projectId: "p1",
+      userId: "younghee",
+      role: "member",
+      displayName: "영희",
+    },
     { projectId: "p1", userId: "jisu", role: "member", displayName: "지수" },
   );
   return p;
@@ -75,7 +80,11 @@ describe("current burden status", () => {
         shares: { chulsoo: "72000" },
       }),
     ];
-    const status = toBurdenStatus(expenses, ["minsu", "chulsoo", "younghee"], "KRW");
+    const status = toBurdenStatus(
+      expenses,
+      ["minsu", "chulsoo", "younghee"],
+      "KRW",
+    );
     const minsu = status.rows.find((r) => r.userId === "minsu")!;
     expect(minsu.paid.toString()).toBe("360000");
     expect(minsu.shareTotal.toString()).toBe("164000");
@@ -138,7 +147,10 @@ describe("planMinTransfers", () => {
       { userId: "jisu", balance: Money.of("-102000") },
     ]);
     expect(transfers).toHaveLength(3);
-    const total = transfers.reduce((acc, t) => acc.plus(t.amount), Money.zero());
+    const total = transfers.reduce(
+      (acc, t) => acc.plus(t.amount),
+      Money.zero(),
+    );
     expect(total.toString()).toBe("196000");
     expect(transfers.every((t) => t.toUserId === "minsu")).toBe(true);
   });
@@ -163,7 +175,11 @@ describe("computeFinalSettlement", () => {
         shares: { minsu: "10000", chulsoo: "10000", younghee: "10000" },
       }),
     ];
-    const result = computeFinalSettlement(expenses, ["minsu", "chulsoo", "younghee"], "KRW");
+    const result = computeFinalSettlement(
+      expenses,
+      ["minsu", "chulsoo", "younghee"],
+      "KRW",
+    );
     const minsu = result.balances.find((b) => b.userId === "minsu")!;
     expect(minsu.balance.toString()).toBe("20000");
     expect(result.transfers).toHaveLength(2);

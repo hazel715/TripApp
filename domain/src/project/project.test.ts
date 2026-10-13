@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { addMemberToProject, createProject, removeMemberFromProject, reopenProjectIfClosed } from "./project.ts";
+import {
+  addMemberToProject,
+  createProject,
+  removeMemberFromProject,
+  reopenProjectIfClosed,
+} from "./project.ts";
 
 describe("project members and status", () => {
   const now = new Date("2026-01-01T00:00:00Z");
@@ -48,7 +53,9 @@ describe("project members and status", () => {
       ownerDisplayName: "민수",
       now,
     });
-    expect(() => removeMemberFromProject(project, "u1", now)).toThrow(/last owner/);
+    expect(() => removeMemberFromProject(project, "u1", now)).toThrow(
+      /last owner/,
+    );
   });
 
   it("reopens a closed project", () => {

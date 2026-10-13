@@ -1,3 +1,4 @@
+import { DomainError } from "../shared/errors.ts";
 import { Decimal } from "decimal.js";
 import { Money } from "../shared/money.ts";
 import type { Expense } from "./expense.ts";
@@ -70,7 +71,10 @@ export function toBurdenStatus(
   memberUserIds: string[],
   currency: string,
 ): BurdenStatus {
-  const map = accumulateBurden(expenses.filter((expense) => expense.settlementCurrency === currency), memberUserIds);
+  const map = accumulateBurden(
+    expenses.filter((expense) => expense.settlementCurrency === currency),
+    memberUserIds,
+  );
   const rows: BurdenRow[] = [...map.entries()].map(([userId, row]) => {
     const paid = Money.of(row.paid);
     const shareTotal = Money.of(row.shareTotal);
@@ -86,7 +90,10 @@ export function toBurdenStatus(
 }
 
 export function assertBalancesSumToZero(rows: BurdenRow[]): void {
-  const sum = rows.reduce((acc, row) => acc.plus(row.difference.value), new Decimal(0));
+  const sum = rows.reduce(
+    (acc, row) => acc.plus(row.difference.value),
+    new Decimal(0),
+  );
   if (!sum.isZero()) {
     throw new Error(`Balance total must be 0, got ${sum.toString()}`);
   }
@@ -124,7 +131,10 @@ function greedyTransfers(nodes: Node[]): Transfer[] {
   return transfers;
 }
 
-function maxZeroSumGroups(balances: Decimal[]): { count: number; groups: number[] } {
+function maxZeroSumGroups(balances: Decimal[]): {
+  count: number;
+  groups: number[];
+} {
   const n = balances.length;
   const size = 1 << n;
   const sums: Decimal[] = Array.from({ length: size }, () => new Decimal(0));
@@ -152,14 +162,15 @@ function maxZeroSumGroups(balances: Decimal[]): { count: number; groups: number[
   let mask = size - 1;
   let group = 0;
   while (mask) {
-    const bit = parent[mask] || (mask & -mask);
+    const bit = parent[mask] || mask & -mask;
     group |= bit;
     mask ^= bit;
     if (sums[mask].isZero()) {
       groups.push(group);
       group = 0;
     }
-  }  return { count: dp[size - 1] || 1, groups };
+  }
+  return { count: dp[size - 1] || 1, groups };
 }
 
 export function planMinTransfers(
@@ -168,14 +179,21 @@ export function planMinTransfers(
   const nodes: Node[] = balances
     .filter((row) => !row.balance.isZero())
     .map((row) => ({ userId: row.userId, balance: row.balance.value }));
-  const total = nodes.reduce((sum, node) => sum.plus(node.balance), new Decimal(0));
-  if (!total.isZero()) throw new Error("Balance total must be 0");
+  const total = nodes.reduce(
+    (sum, node) => sum.plus(node.balance),
+    new Decimal(0),
+  );
+  if (!total.isZero())
+    throw new DomainError("INVALID_BALANCE", "Balance total must be 0");
   if (new Set(balances.map((row) => row.userId)).size !== balances.length) {
-    throw new Error("Duplicate balance user");
+    throw new DomainError("DUPLICATE_BALANCE", "Duplicate balance user");
   }
   if (nodes.length === 0) return [];
   // Explicit operational bound: never return an approximate plan above it.
-  if (nodes.length > 20) throw new Error("Exact settlement supports at most 20 nonzero balances per currency");
+  if (nodes.length > 20)
+    throw new Error(
+      "Exact settlement supports at most 20 nonzero balances per currency",
+    );
 
   const { groups } = maxZeroSumGroups(nodes.map((n) => n.balance));
   const transfers: Transfer[] = [];

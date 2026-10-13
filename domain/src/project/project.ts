@@ -47,14 +47,20 @@ export function createProject(input: {
   };
 }
 
-export function findMember(project: Project, userId: string): ProjectMember | undefined {
+export function findMember(
+  project: Project,
+  userId: string,
+): ProjectMember | undefined {
   return project.members.find((m) => m.userId === userId);
 }
 
 export function requireMember(project: Project, userId: string): ProjectMember {
   const member = findMember(project, userId);
   if (!member) {
-    throw new DomainError("NOT_PROJECT_MEMBER", "User is not a member of this project");
+    throw new DomainError(
+      "NOT_PROJECT_MEMBER",
+      "User is not a member of this project",
+    );
   }
   return member;
 }

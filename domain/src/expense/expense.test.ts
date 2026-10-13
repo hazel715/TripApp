@@ -16,7 +16,12 @@ function project(): Project {
     now,
   });
   p.members.push(
-    { projectId: "p1", userId: "u-chulsoo", role: "member", displayName: "철수" },
+    {
+      projectId: "p1",
+      userId: "u-chulsoo",
+      role: "member",
+      displayName: "철수",
+    },
     { projectId: "p1", userId: "u-young", role: "member", displayName: "영희" },
   );
   return p;
@@ -67,9 +72,16 @@ describe("assembleExpense", () => {
   });
 
   it("rejects zero amount", () => {
-    expect(() => assembleExpense(draft({ amount: "0", settlementAmount: "0", shares: [{ userId: "u-minsu", shareAmount: "0" }] }), project())).toThrow(
-      /cannot be zero/,
-    );
+    expect(() =>
+      assembleExpense(
+        draft({
+          amount: "0",
+          settlementAmount: "0",
+          shares: [{ userId: "u-minsu", shareAmount: "0" }],
+        }),
+        project(),
+      ),
+    ).toThrow(/cannot be zero/);
   });
 
   it("allows negative expense and matching negative shares", () => {
@@ -135,8 +147,23 @@ describe("assembleExpense", () => {
 describe("splitSettlementAmount", () => {
   it("keeps the exact total", () => {
     const shares = splitSettlementAmount(Money.of("100"), ["a", "b", "c"]);
-    const sum = shares.reduce((acc, s) => acc.plus(s.shareAmount), Money.zero());
+    const sum = shares.reduce(
+      (acc, s) => acc.plus(s.shareAmount),
+      Money.zero(),
+    );
     expect(sum.equals(Money.of("100"))).toBe(true);
     expect(shares.every((s) => !s.shareAmount.isZero())).toBe(true);
   });
+});
+
+it("rejects impossible calendar dates and stored NUMERIC overflow", () => {
+  expect(() =>
+    assembleExpense(draft({ expenseDate: "2026-02-30" }), project()),
+  ).toThrow(/calendar/);
+  expect(() =>
+    assembleExpense(draft({ amount: "100000000000000" }), project()),
+  ).toThrow(/NUMERIC/);
+  expect(() =>
+    assembleExpense(draft({ currency: "USD", fxRate: null }), project()),
+  ).toThrow(/fx_rate/);
 });
