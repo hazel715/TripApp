@@ -29,6 +29,7 @@ export type Session = {
 export interface LoginTokenRepository {
   save(token: LoginToken): Promise<void>;
   findByTokenHash(tokenHash: string): Promise<LoginToken | null>;
+  consume(tokenHash: string, now: Date): Promise<LoginToken | null>;
 }
 
 export interface SessionRepository {

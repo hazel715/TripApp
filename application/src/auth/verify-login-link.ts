@@ -1,4 +1,4 @@
-import { normalizeEmail, type User, type UserRepository } from "@tripapp/domain";
+import { normalizeEmail, type User, type UnitOfWork, type UserRepository } from "@tripapp/domain";
 import type {
   Clock,
   IdGenerator,
@@ -9,6 +9,7 @@ import type {
 } from "../ports.ts";
 
 export type VerifyLoginLinkDeps = {
+  uow: UnitOfWork;
   tokens: LoginTokenRepository;
   sessions: SessionRepository;
   users: UserRepository;
@@ -22,13 +23,13 @@ export async function verifyLoginLink(
   deps: VerifyLoginLinkDeps,
   input: { token: string },
 ): Promise<{ sessionToken: string; user: User; isNewUser: boolean }> {
-  const token = await deps.tokens.findByTokenHash(deps.hasher.hash(input.token));
+  return deps.uow.run(async () => {
   const now = deps.clock.now();
-  if (!token || token.consumedAt || token.expiresAt <= now) {
+  const token = await deps.tokens.consume(deps.hasher.hash(input.token), now);
+  if (!token) {
     throw new Error("INVALID_LOGIN_TOKEN");
   }
-  token.consumedAt = now;
-  await deps.tokens.save(token);
+
 
   const email = normalizeEmail(token.email);
   let user = await deps.users.findByEmail(email);
@@ -58,4 +59,5 @@ export async function verifyLoginLink(
   };
   await deps.sessions.save(session);
   return { sessionToken, user, isNewUser };
+  });
 }
