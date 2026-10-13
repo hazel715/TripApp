@@ -1,20 +1,261 @@
-import {useState} from "react";
-import {Decimal} from "decimal.js";
-import {api,type Category,type Expense,type Project,type Share} from "./api.ts";
-import {equalShares,today} from "./money.ts";
-type Props={project:Project;categories:Category[];expense:Expense|null;onSaved:()=>Promise<void>;onCancel:()=>void};
-export function ExpenseForm({project,categories,expense,onSaved,onCancel}:Props){
- const [form,setForm]=useState({description:expense?.description??"",amount:expense?.amount??"",currency:expense?.currency??project.defaultExpenseCurrency,fxRate:expense?.fxRate??"",settlementAmount:expense?.settlementAmount??"",settlementCurrency:expense?.settlementCurrency??project.settlementCurrency,payerUserId:expense?.payerUserId??project.members[0]?.userId??"",categoryId:expense?.categoryId??"",expenseDate:expense?expense.expenseDate??"":today()});
- const [shares,setShares]=useState<Share[]>(expense?.shares??[]);const [memo,setMemo]=useState("");const [error,setError]=useState("");const [busy,setBusy]=useState(false);
- const root=`/projects/${project.id}/expenses`;
- function field(key:keyof typeof form,value:string){setForm(old=>({...old,[key]:value}))}
- function split(ids:string[],total=form.settlementAmount){try{setShares(equalShares(total,ids));setError("")}catch(e){setError((e as Error).message)}}
- async function parse(){try{const result=await api<{description:string;amount:string;participantUserIds:string[];currencyHint:string|null}>(root+"/quick-memo","POST",{text:memo});setForm(old=>({...old,description:result.description,amount:result.amount,currency:result.currencyHint??old.currency,...((result.currencyHint??form.currency)===form.settlementCurrency?{settlementAmount:result.amount}:{})}));if((result.currencyHint??form.currency)===form.settlementCurrency)split(result.participantUserIds,result.amount);else setShares(result.participantUserIds.map(userId=>({userId,shareAmount:""})));setError("")}catch(e){setError((e as Error).message)}}
- async function save(event:React.FormEvent){event.preventDefault();setBusy(true);try{await api(root+(expense?`/${expense.id}`:""),expense?"PATCH":"POST",{...form,categoryId:form.categoryId||null,expenseDate:form.expenseDate||null,fxRate:form.fxRate||null,shares:shares.filter(s=>s.shareAmount!==""&&!new Decimal(s.shareAmount).isZero())});await onSaved()}catch(e){setError((e as Error).message)}finally{setBusy(false)}}
- let sum="입력 중";try{sum=shares.reduce((total,s)=>total.plus(s.shareAmount||"0"),new Decimal(0)).toFixed(4)}catch{}
- return <section className="panel"><h2>{expense?"지출 수정":"새 지출"}</h2><div className="inline"><input aria-label="Quick Memo" placeholder="점심 12000 민수 철수" value={memo} onChange={e=>setMemo(e.target.value)}/><button type="button" onClick={()=>void parse()}>메모 해석</button></div><form onSubmit={event=>void save(event)}>
- <div className="grid"><label>설명<input required value={form.description} onChange={e=>field("description",e.target.value)}/></label><label>지출 날짜<input type="date" value={form.expenseDate} onChange={e=>field("expenseDate",e.target.value)}/><small>미정이면 비워 두세요.</small></label><label>결제자<select value={form.payerUserId} onChange={e=>field("payerUserId",e.target.value)}>{project.members.map(m=><option key={m.userId} value={m.userId}>{m.displayName}</option>)}</select></label><label>카테고리<select value={form.categoryId} onChange={e=>field("categoryId",e.target.value)}><option value="">선택 안 함</option>{categories.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></label>
- {([['amount','결제 금액'],['currency','결제 통화'],['fxRate','환율 (1 결제 통화 → 정산 통화)'],['settlementAmount','확정 정산 금액'],['settlementCurrency','정산 통화']] as const).map(([key,label])=><label key={key}>{label}<input required={key!=="fxRate"} value={form[key]} onChange={e=>field(key,e.target.value)} placeholder={key.includes("Currency")||key==="currency"?"KRW":""}/></label>)}</div>
- <fieldset><legend>부담 참여자 · 결제자와 달라도 됩니다</legend>{project.members.map(member=><div key={member.userId} className="share"><label><input type="checkbox" checked={shares.some(s=>s.userId===member.userId)} onChange={e=>{const ids=e.target.checked?[...shares.map(s=>s.userId),member.userId]:shares.filter(s=>s.userId!==member.userId).map(s=>s.userId);split(ids)}}/>{member.displayName}</label>{shares.some(s=>s.userId===member.userId)&&<input aria-label={`${member.displayName} 부담액`} value={shares.find(s=>s.userId===member.userId)!.shareAmount} onChange={e=>setShares(old=>old.map(s=>s.userId===member.userId?{...s,shareAmount:e.target.value}:s))}/>}</div>)}<button type="button" onClick={()=>split(shares.map(s=>s.userId))}>현재 정산 금액으로 균등 분할</button><p>부담 합계 {sum} / 정산 금액 {form.settlementAmount||"미입력"} {form.settlementCurrency}</p></fieldset>
- {error&&<p role="alert" className="error">{error}</p>}<div className="inline"><button disabled={busy} className="primary">{busy?"저장 중…":"저장"}</button><button type="button" onClick={onCancel}>취소</button></div></form></section>
+import { useState } from "react";
+import { Decimal } from "decimal.js";
+import {
+  api,
+  type Category,
+  type Expense,
+  type Project,
+  type Share,
+} from "./api.ts";
+import { equalShares, today } from "./money.ts";
+type Props = {
+  project: Project;
+  categories: Category[];
+  expense: Expense | null;
+  onSaved: () => Promise<void>;
+  onCancel: () => void;
+};
+export function ExpenseForm({
+  project,
+  categories,
+  expense,
+  onSaved,
+  onCancel,
+}: Props) {
+  const [form, setForm] = useState({
+    description: expense?.description ?? "",
+    amount: expense?.amount ?? "",
+    currency: expense?.currency ?? project.defaultExpenseCurrency,
+    fxRate: expense?.fxRate ?? "",
+    settlementAmount: expense?.settlementAmount ?? "",
+    settlementCurrency:
+      expense?.settlementCurrency ?? project.settlementCurrency,
+    payerUserId: expense?.payerUserId ?? project.members[0]?.userId ?? "",
+    categoryId: expense?.categoryId ?? "",
+    expenseDate: expense ? (expense.expenseDate ?? "") : today(),
+  });
+  const [shares, setShares] = useState<Share[]>(expense?.shares ?? []);
+  const [memo, setMemo] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const root = `/projects/${project.id}/expenses`;
+  function field(key: keyof typeof form, value: string) {
+    setForm((old) => ({ ...old, [key]: value }));
+  }
+  function split(ids: string[], total = form.settlementAmount) {
+    try {
+      setShares(equalShares(total, ids));
+      setError("");
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+  async function parse() {
+    try {
+      const result = await api<{
+        description: string;
+        amount: string;
+        participantUserIds: string[];
+        currencyHint: string | null;
+      }>(root + "/quick-memo", "POST", { text: memo });
+      setForm((old) => ({
+        ...old,
+        description: result.description,
+        amount: result.amount,
+        currency: result.currencyHint ?? old.currency,
+        ...((result.currencyHint ?? form.currency) === form.settlementCurrency
+          ? { settlementAmount: result.amount }
+          : {}),
+      }));
+      if ((result.currencyHint ?? form.currency) === form.settlementCurrency)
+        split(result.participantUserIds, result.amount);
+      else
+        setShares(
+          result.participantUserIds.map((userId) => ({
+            userId,
+            shareAmount: "",
+          })),
+        );
+      setError("");
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+  async function save(event: React.FormEvent) {
+    event.preventDefault();
+    setBusy(true);
+    try {
+      await api(
+        root + (expense ? `/${expense.id}` : ""),
+        expense ? "PATCH" : "POST",
+        {
+          ...form,
+          categoryId: form.categoryId || null,
+          expenseDate: form.expenseDate || null,
+          fxRate: form.fxRate || null,
+          shares: shares.filter(
+            (s) => s.shareAmount !== "" && !new Decimal(s.shareAmount).isZero(),
+          ),
+        },
+      );
+      await onSaved();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+  let sum = "입력 중";
+  try {
+    sum = shares
+      .reduce((total, s) => total.plus(s.shareAmount || "0"), new Decimal(0))
+      .toFixed(4);
+  } catch {}
+  return (
+    <section className="panel">
+      <h2>{expense ? "지출 수정" : "새 지출"}</h2>
+      <div className="inline">
+        <input
+          aria-label="Quick Memo"
+          placeholder="점심 12000 민수 철수"
+          value={memo}
+          onChange={(e) => setMemo(e.target.value)}
+        />
+        <button type="button" onClick={() => void parse()}>
+          메모 해석
+        </button>
+      </div>
+      <form onSubmit={(event) => void save(event)}>
+        <div className="grid">
+          <label>
+            설명
+            <input
+              required
+              value={form.description}
+              onChange={(e) => field("description", e.target.value)}
+            />
+          </label>
+          <label>
+            지출 날짜
+            <input
+              type="date"
+              value={form.expenseDate}
+              onChange={(e) => field("expenseDate", e.target.value)}
+            />
+            <small>미정이면 비워 두세요.</small>
+          </label>
+          <label>
+            결제자
+            <select
+              value={form.payerUserId}
+              onChange={(e) => field("payerUserId", e.target.value)}
+            >
+              {project.members.map((m) => (
+                <option key={m.userId} value={m.userId}>
+                  {m.displayName}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            카테고리
+            <select
+              value={form.categoryId}
+              onChange={(e) => field("categoryId", e.target.value)}
+            >
+              <option value="">선택 안 함</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          {(
+            [
+              ["amount", "결제 금액"],
+              ["currency", "결제 통화"],
+              ["fxRate", "환율 (1 결제 통화 → 정산 통화)"],
+              ["settlementAmount", "확정 정산 금액"],
+              ["settlementCurrency", "정산 통화"],
+            ] as const
+          ).map(([key, label]) => (
+            <label key={key}>
+              {label}
+              <input
+                required={key !== "fxRate"}
+                value={form[key]}
+                onChange={(e) => field(key, e.target.value)}
+                placeholder={
+                  key.includes("Currency") || key === "currency" ? "KRW" : ""
+                }
+              />
+            </label>
+          ))}
+        </div>
+        <fieldset>
+          <legend>부담 참여자 · 결제자와 달라도 됩니다</legend>
+          {project.members.map((member) => (
+            <div key={member.userId} className="share">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={shares.some((s) => s.userId === member.userId)}
+                  onChange={(e) => {
+                    const ids = e.target.checked
+                      ? [...shares.map((s) => s.userId), member.userId]
+                      : shares
+                          .filter((s) => s.userId !== member.userId)
+                          .map((s) => s.userId);
+                    split(ids);
+                  }}
+                />
+                {member.displayName}
+              </label>
+              {shares.some((s) => s.userId === member.userId) && (
+                <input
+                  aria-label={`${member.displayName} 부담액`}
+                  value={
+                    shares.find((s) => s.userId === member.userId)!.shareAmount
+                  }
+                  onChange={(e) =>
+                    setShares((old) =>
+                      old.map((s) =>
+                        s.userId === member.userId
+                          ? { ...s, shareAmount: e.target.value }
+                          : s,
+                      ),
+                    )
+                  }
+                />
+              )}
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => split(shares.map((s) => s.userId))}
+          >
+            현재 정산 금액으로 균등 분할
+          </button>
+          <p>
+            부담 합계 {sum} / 정산 금액 {form.settlementAmount || "미입력"}{" "}
+            {form.settlementCurrency}
+          </p>
+        </fieldset>
+        {error && (
+          <p role="alert" className="error">
+            {error}
+          </p>
+        )}
+        <div className="inline">
+          <button disabled={busy} className="primary">
+            {busy ? "저장 중…" : "저장"}
+          </button>
+          <button type="button" onClick={onCancel}>
+            취소
+          </button>
+        </div>
+      </form>
+    </section>
+  );
 }
