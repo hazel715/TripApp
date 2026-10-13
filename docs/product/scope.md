@@ -3,7 +3,7 @@
 ## In scope — MVP (구현됨)
 
 - Passwordless email 인증
-- Project CRUD(생성/목록/상세) 및 member 추가/제거
+- Project 생성/목록/상세 및 member 추가/제거
 - 전역 Category
 - Expense 생성/수정/삭제, Share 설정, 합계 검증
 - Quick Memo

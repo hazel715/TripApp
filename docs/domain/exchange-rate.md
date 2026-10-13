@@ -20,4 +20,4 @@ Expense에 사용자가 넣은 `fx_rate`와 `settlement_amount`가 정산 원천
 
 테이블은 존재한다. MVP에서 Expense 폼을 자동으로 채우지 않는다.
 
-외부 FX API는 구현하지 않는다. Infrastructure `FxQuotePort`만 둔다.
+외부 FX API는 구현하지 않는다. Domain에 `FxQuotePort`를 두고 향후 Infrastructure adapter가 구현한다. 다른 통화의 Expense에는 fx_rate가 필수다.

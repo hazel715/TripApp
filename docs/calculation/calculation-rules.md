@@ -29,3 +29,5 @@ planMinTransfers(balances) -> transfers
 4. (최종 정산 요청 시에만) 0이 아닌 잔액으로 최소 횟수 송금 계산
 
 원 통화 amount는 정산 합산에 쓰지 않는다.
+
+Expense별 settlement currency override는 통화별로 분리한다. Project 기본 통화와 다른 정산액을 기본 통화 숫자로 합산하지 않는다. 현황/최종정산 API는 통화별 결과 배열을 반환한다.

@@ -1,146 +1,52 @@
 # 서비스 아키텍처
 
-API 경로 목록은 [api.md](./api.md). 데이터 규칙 [../data/data-rules.md](../data/data-rules.md). 계산 [../calculation/calculation-rules.md](../calculation/calculation-rules.md).
+React Web → HTTP → Fastify API → Application use case → Domain 검증/계산과 repository port → Infrastructure 구현 → PostgreSQL.
 
-기존 `app.jsx`를 파일별로 나누는 것이 목적이 아니다. 비즈니스 규칙과 도메인 모델을 추출해 일반적인 그룹 비용 관리 서비스로 재구성한다.
+## 구현 상태와 레거시
 
-## 구현 상태
+같은 저장소의 web/api/application/domain/infrastructure에 MVP를 구현했다. 루트 app.jsx/index.html은 보존된 여행 가이드이며 신규 persistence나 realtime으로 사용하지 않는다.
 
-Fastify API, Application use case, Domain, Infrastructure(PostgreSQL/Drizzle, 콘솔 Email, 인메모리 SSE)가 구현되어 있다.
+## 책임과 의존성
 
-## 레거시
+- Presentation: React 화면/form/표시와 알림. API의 계산 결과를 표시한다. 균등 분할은 UX 편의로 Decimal을 사용하지만 저장 시 서버가 최종 검증한다.
+- API: Fastify HTTP 입력 검증·인증·Application 호출·응답 직렬화. Settlement 전용 route/controller와 CRUD는 없다. Project 하위 read endpoint에서 현재 현황/최종정산을 조회한다.
+- Application: 사용자 행동별 파일. auth·Expense·member 변경을 orchestration하고 트랜잭션 성공 후 변경 알림을 보낸다. Quick Memo 자연어 파싱은 이 계층에 있다.
+- Domain: Money/Expense/Share/Project/Member/User/Category 규칙, 부담 현황, 정확한 최소 송금 계산과 repository interface. React/Fastify/HTTP/PostgreSQL/Drizzle/Firebase/외부 FX SDK에 의존하지 않는다.
+- Infrastructure: PostgreSQL/Drizzle repository·transaction, 개발 EmailSender, SSE broker, clock/ID/token hash. DB 모델을 Domain 모델에 무조건 1:1 강제하지 않는다.
 
-백엔드 없음. 브라우저가 Firestore를 직접 읽고, 같은 파일에서 환산·정산한다. 이 구조를 persistence·realtime으로 재사용하지 않는다.
+## 실제 디렉터리
 
-## 계층과 책임
-
-```
-Presentation          web/
-        ↓ HTTP
-API                   api/
-        ↓
-Application           application/
-        ↓
-Domain                domain/
-        ↑ repository 인터페이스
-Infrastructure        infrastructure/
-        ↓
-PostgreSQL
-```
-
-Domain은 React, Fastify, HTTP, PostgreSQL, Drizzle, Firebase SDK, 외부 FX API SDK에 의존하지 않는다.
-
-### Presentation
-
-- React Web
-- `expenseDate` 표시, form, 변경 알림(bell)
-- 합계·정산·최소 송금 계산의 정본은 서버
-- Quick Memo 입력 중 가벼운 힌트 파싱은 허용. 저장은 Application이 검증
-
-### API
-
-- Fastify
-- HTTP 요청을 Application use case에 위임
-- Settlement 전용 route/controller를 두지 않는다
-- 현재 부담 현황·최종 정산은 Project 조회 endpoint로 제공한다
-
-### Application
-
-- 사용자 행동 단위 파일 (하나의 파일 = 하나의 use case)
-- 트랜잭션 경계
-- Domain 검증 후 Infrastructure persist
-- DB commit 성공 후에만 SSE publish
-
-### Domain
-
-- Money, Expense, ExpenseShare, Project, 부담 현황, 최소 송금 횟수 계산
-- Repository **인터페이스**
-- 외부 I/O 없음
-
-### Infrastructure
-
-- PostgreSQL + Drizzle schema/repository
-- Email provider (MVP: 개발용 콘솔/로그 adapter)
-- FX quote adapter port (MVP: 자동 연동 없음)
-- SSE broker
-- Auth token/session 저장
-
-## 디렉터리
-
-```
+```text
 api/src/
-  server.ts
-  app.ts
-  routes/
-    auth.routes.ts
-    projects.routes.ts
-    expenses.routes.ts
-    categories.routes.ts
-  controllers/
-  plugins/
-    auth.ts
-    db.ts
-    sse.ts
-  middleware/
-    error-handler.ts
-    request-context.ts
-application/
-  auth/
-  projects/
-  expenses/
-  categories/
-  quick-memo/
-domain/
-  user/
-  project/
-  expense/
-  category/
-  shared/
-infrastructure/
-  postgres/
-  auth/
-  email/
-  fx/
-  sse/
+  app.ts, server.ts
+  routes/{auth,projects,expenses,categories}.routes.ts
+  controllers/{auth,projects,expenses,categories}.controller.ts
+  plugins/{auth,db,sse}.ts
+  middleware/{error-handler,request-context}.ts
+application/src/{auth,projects,expenses,categories,quick-memo}/
+domain/src/{user,project,expense,category,shared}/
+infrastructure/src/{postgres,email,realtime,testing}/
 web/src/
 ```
 
-## 처리 순서
+Repository interface는 Domain에 두며 auth repository도 domain/src/user/auth-repository.ts에 있다. Application의 ports.ts는 Clock/ID/Email/변경 알림 등 orchestration 경계와 auth 타입 re-export다.
 
-Client → HTTP → Application → Domain 검증/계산 → PostgreSQL transaction → commit 성공 → SSE event.
+## Transaction과 동시성
 
-SSE는 consistency 수단이 아니다. source of truth는 PostgreSQL이다. 클라이언트는 변경됨을 인지한 뒤 적절한 시점에 재조회한다.
+Expense/Share 생성·수정·삭제 및 closed → active, member와 신규 User 생성, one-time token 소비·User 생성·session 발급을 PostgreSQL transaction으로 처리한다. AsyncLocalStorage로 같은 transaction 연결을 repository에 전달한다. Project 변경은 부모 행을 lock하고 REPEATABLE READ를 사용한다. 동시 충돌은 API에서 409로 반환하며 실패한 transaction의 변경 알림은 발행하지 않는다.
 
-### 지출 생성/수정/삭제
+현황/최종정산도 snapshot transaction 안에서 읽는다. Expense settlement currency override를 허용하므로 통화별로 계산한다. 저장된 settlement_amount만 사용하고 조회 중 FX 환산은 하지 않는다.
 
-한 트랜잭션에서 Expense와 Share를 함께 처리한다. Share 합 ≠ `settlement_amount` 이면 저장을 거부한다.
+## SSE
 
-closed Project에서 Expense 변경이 성공하면 Project를 `active`로 전환한다.
+인증된 Project 멤버만 변경 알림을 구독한다. 세션 만료·비활성화·멤버 제거를 heartbeat/발행 시 다시 확인한다. commit 성공 후 project.changed를 보내며 Web은 알림 표시만 올린다. 재조회는 사용자 행동이다. SSE는 consistency의 정본이 아니며 PostgreSQL이 정본이다.
 
-### 현재 부담 현황
+현재 broker는 단일 API 프로세스 메모리 방식으로 event replay와 다중 인스턴스 전달은 지원하지 않는다.
 
-전체 Expense/Share 기준으로 사용자별 실제 결제액, Share 총액, 차액을 계산한다. 송금 목록을 붙이지 않는다.
+## 인증과 외부 adapter
 
-### 최종 정산
+Passwordless email → 15분 one-time link → 기존 로그인/신규 가입 → 기본 30일 session. 원문 token 대신 hash를 저장하고 HttpOnly/SameSite=Lax cookie를 사용한다. 운영에서는 secure cookie가 필요하다. 개발 EmailSender는 링크를 서버 로그에 출력한다. 현재 기본 server는 production에서 개발 adapter 사용을 거절한다.
 
-사용자가 명시적으로 최종 정산을 요청한 요청에서만 최소 송금 횟수 목록을 계산해 반환한다. DB에 쓰지 않는다.
+FX는 사용자가 currency/fx_rate/settlement_amount를 확정한다. fx_quotes와 Domain FxQuotePort를 준비했지만 외부 API adapter는 미구현·미사용이다.
 
-## 환율 어댑터
-
-MVP는 사용자가 Expense의 `currency`, `settlement_currency`, `fx_rate`, `settlement_amount`를 직접 입력한다.
-
-`fx_quotes` 테이블은 향후 외부 FX API용 저장 구조다. Expense와 자동 연결하지 않는다.
-
-```
-FxQuotePort (domain/application 경계)
-    → infrastructure/fx adapter
-    → 현재는 미사용 (수동 입력)
-```
-
-## 인증
-
-Passwordless email: one-time login link → 기존 사용자는 login, 없으면 signup → PostgreSQL session.
-
-## 시크릿
-
-`DATABASE_URL`, 세션 서명/쿠키, (향후) 메일·시세 API 키는 Infrastructure 환경 변수. 브라우저에 관리자 키를 두지 않는다.
+DATABASE_URL과 향후 Email/FX 키는 서버 환경 변수이며 브라우저에 관리자 키를 전달하지 않는다. 실행과 제한은 README, endpoint는 api.md를 참고한다.

@@ -8,7 +8,7 @@ SQL에 최소 송금 매칭이나 환율 곱을 넣지 않는다. 저장·FK·�
 
 금액은 `NUMERIC(18,4)`. 환율은 `NUMERIC(18,8)`. JS/IEEE float 컬럼을 쓰지 않는다. 지출 달력 날짜는 `DATE` (NULL 허용). 서버 시각은 `TIMESTAMPTZ`.
 
-구현: `infrastructure/postgres/schema.ts` 및 `infrastructure/postgres/migrations/`.
+구현: `infrastructure/src/postgres/schema.ts` 및 `infrastructure/src/postgres/migrations/`.
 
 ## ER 요약
 

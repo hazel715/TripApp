@@ -59,3 +59,7 @@ closed Project여도 Expense 변경을 거절하지 않는다. 성공 시 Projec
 - 401 미인증
 - 403 비멤버
 - 404 없음
+
+## 응답 및 인증 세부사항
+
+금액/환율은 JSON 문자열이며 IEEE number로 변환하지 않는다. balances와 settlement endpoint는 통화별 결과 배열을 반환한다. 세션 cookie는 tripapp_session (HttpOnly, SameSite=Lax)이다. mutation의 browser Origin은 WEB_ORIGIN과 일치해야 한다. 인증 token 소비와 user/session 생성은 하나의 transaction이며 동시 충돌은 409로 재시도를 안내할 수 있다. 검증 실패 400, 중복·transaction 충돌 409, deactivated 사용자 401이다. 개발 환경의 로그인 링크는 서버 로그에 출력한다. 정산 대상 20명 초과는 계산 오류를 반환하고 근사 송금은 제공하지 않는다.
