@@ -1,66 +1,63 @@
 import { Decimal } from "decimal.js";
-import { DomainError, type Project } from "@tripapp/domain";
-
+import {
+  DomainError,
+  Money,
+  assertNonZero,
+  type Project,
+} from "@tripapp/domain";
 export type ParsedQuickMemo = {
   description: string;
   amount: string;
   participantUserIds: string[];
   currencyHint: string | null;
 };
-
-/**
- * Parses a one-line memo such as "점심 12000 민수 철수".
- * Matching uses project member display names (and email local-part).
- */
-export function parseQuickMemo(text: string, project: Project): ParsedQuickMemo {
+/** Input parsing belongs to Application; Expense validation remains authoritative at save. */
+export function parseQuickMemo(
+  text: string,
+  project: Project,
+): ParsedQuickMemo {
   const raw = text.trim();
-  if (!raw) {
-    throw new DomainError("INVALID_MEMO", "Quick memo text is required");
-  }
-
-  const amountMatch = raw.match(/-?\d+(?:\.\d+)?/);
-  if (!amountMatch) {
+  const match = raw.match(
+    /(?:^|\s)(-?\d+(?:\.\d+)?)(만원|원|위안|달러|USD|KRW|CNY)?(?=\s|$)/i,
+  );
+  if (!match)
     throw new DomainError("INVALID_MEMO", "Quick memo must include an amount");
+  const suffix = match[2]?.toLowerCase();
+  const value = new Decimal(match[1]).times(suffix === "만원" ? 10000 : 1);
+  const amount = Money.of(value);
+  assertNonZero(amount, "amount");
+  const rest = raw.replace(match[0], " ").trim().split(/\s+/).filter(Boolean);
+  const participants = new Set<string>();
+  const description: string[] = [];
+  for (const token of rest) {
+    const members = project.members.filter(
+      (member) => member.displayName.toLowerCase() === token.toLowerCase(),
+    );
+    if (members.length > 1)
+      throw new DomainError(
+        "AMBIGUOUS_MEMBER",
+        "Quick memo member name is ambiguous",
+      );
+    if (members.length) participants.add(members[0].userId);
+    else description.push(token);
   }
-  let amount = amountMatch[0];
-  if (/만원/.test(raw) && new Decimal(amount).abs().lt(1000)) {
-    amount = new Decimal(amount).times(10000).toString();
-  }
-
-  let currencyHint: string | null = null;
-  if (/(달러|\$|usd)/i.test(raw)) currencyHint = "USD";
-  else if (/(원|만원|krw)/i.test(raw)) currencyHint = "KRW";
-  else if (/(위안|cny)/i.test(raw)) currencyHint = "CNY";
-
-  const tokens = raw.split(/\s+/);
-  const matchedIds: string[] = [];
-  const consumed = new Set<number>();
-
-  for (const member of project.members) {
-    const aliases = [
-      member.displayName,
-      member.displayName.replace(/\s+/g, ""),
-    ].filter(Boolean);
-    tokens.forEach((token, index) => {
-      if (consumed.has(index)) return;
-      if (aliases.some((alias) => alias.toLowerCase() === token.toLowerCase())) {
-        matchedIds.push(member.userId);
-        consumed.add(index);
-      }
-    });
-  }
-
-  const descriptionTokens = tokens.filter((token, index) => {
-    if (consumed.has(index)) return false;
-    if (token === amountMatch[0]) return false;
-    if (/^(달러|\$|usd|원|만원|krw|위안|cny)$/i.test(token)) return false;
-    if (/^-?\d+(?:\.\d+)?$/.test(token)) return false;
-    return true;
-  });
-
-  const description = descriptionTokens.join(" ").trim() || "빠른 메모 지출";
-  const participantUserIds =
-    matchedIds.length > 0 ? [...new Set(matchedIds)] : project.members.map((m) => m.userId);
-
-  return { description, amount, participantUserIds, currencyHint };
+  const currencyHint = suffix
+    ? ({
+        만원: "KRW",
+        원: "KRW",
+        krw: "KRW",
+        위안: "CNY",
+        cny: "CNY",
+        달러: "USD",
+        usd: "USD",
+      }[suffix] ?? null)
+    : null;
+  return {
+    description: description.join(" ") || "빠른 메모 지출",
+    amount: amount.toString(),
+    participantUserIds: participants.size
+      ? [...participants]
+      : project.members.map((member) => member.userId),
+    currencyHint,
+  };
 }

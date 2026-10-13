@@ -37,3 +37,7 @@ Persistence checkpoint: nine Drizzle tables and generated SQL migration exist. P
 API checkpoint: Fastify auth/projects/expenses/categories and authenticated SSE connected. API/Application memory integration tests verify CRUD, share mismatch, negative values, rollback, reopen, no notification before commit and one-time concurrent verification. Domain+API: 27 tests passed; API typecheck passed. PostgreSQL/Docker executables unavailable on PATH.
 
 Web checkpoint: React login, project list/create, owner member controls, global category creation, Expense CRUD/equal split/custom shares, server memo preview, currency-grouped burden and explicit final settlement implemented. SSE only sets a notification flag. Web typecheck passed.
+
+Verification checkpoint: 37 unique source tests passed including real PostgreSQL and authenticated SSE. Chrome smoke passed email callback, project/member creation, expense with payer outside shares, current burden, explicitly requested final transfers; inspected desktop/mobile screenshots, no page overflow or uncaught JavaScript errors. All workspace typechecks passed. Unit test discovery now excludes dist duplicates.
+
+Final implementation checkpoint: 40 tests passed with real Fastify→PostgreSQL HTTP flow and failure-after-write rollback. Drizzle generate reports no schema changes. Production dependency audit: 0 vulnerabilities; full audit retains 4 moderate findings in development tooling. Browser smoke and desktop/mobile inspection passed.
