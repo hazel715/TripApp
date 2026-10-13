@@ -1,5 +1,11 @@
 import { normalizeEmail } from "@tripapp/domain";
-import type { Clock, EmailSender, IdGenerator, LoginTokenRepository, TokenHasher } from "../ports.ts";
+import type {
+  Clock,
+  EmailSender,
+  IdGenerator,
+  LoginTokenRepository,
+  TokenHasher,
+} from "../ports.ts";
 
 export type SendLoginLinkDeps = {
   tokens: LoginTokenRepository;
