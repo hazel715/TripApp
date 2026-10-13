@@ -1,1 +1,29 @@
-{"name":"@tripapp/infrastructure","version":"0.1.0","type":"module","exports":{".":"./src/index.ts"},"scripts":{"typecheck":"tsc --noEmit","build":"tsc","test":"vitest run --passWithNoTests","drizzle:generate":"drizzle-kit generate","drizzle:migrate":"tsx src/postgres/migrate.ts"},"dependencies":{"@tripapp/domain":"*","@tripapp/application":"*","drizzle-orm":"^0.45.0","pg":"^8.16.0"},"devDependencies":{"@types/pg":"^8.15.0","@types/node":"^22.0.0","drizzle-kit":"^0.31.0","tsx":"^4.20.0","typescript":"^5.9.0","vitest":"^2.1.4"}}
+{
+  "name": "@tripapp/infrastructure",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsc",
+    "test": "vitest run --passWithNoTests",
+    "drizzle:generate": "drizzle-kit generate",
+    "drizzle:migrate": "tsx --env-file=../.env src/postgres/migrate.ts"
+  },
+  "dependencies": {
+    "@tripapp/domain": "*",
+    "@tripapp/application": "*",
+    "drizzle-orm": "^0.45.0",
+    "pg": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.15.0",
+    "@types/node": "^22.0.0",
+    "drizzle-kit": "^0.31.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0",
+    "vitest": "^5.0.4"
+  }
+}

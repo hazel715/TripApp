@@ -8,3 +8,4 @@ coverage/
 web/dist/
 **/*.tsbuildinfo
 .DS_Store
+.test-data/

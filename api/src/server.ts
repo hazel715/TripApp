@@ -1,10 +1,37 @@
-import {createPostgres,ConsoleEmailSender,SseBroker,clock,ids,hasher} from "@tripapp/infrastructure";
-import {createApp} from "./app.ts";
-if(!process.env.DATABASE_URL)throw new Error("DATABASE_URL is required");
-if(process.env.NODE_ENV==="production")throw new Error("Configure a production EmailSender before running in production; the bundled sender logs login links");
-const persistence=createPostgres(process.env.DATABASE_URL);
-const app=await createApp({...persistence,clock,ids,hasher,email:new ConsoleEmailSender(),notifier:new SseBroker(),webOrigin:process.env.WEB_ORIGIN??"http://localhost:5173",ttlMinutes:Number(process.env.LOGIN_TOKEN_TTL_MINUTES??15),sessionTtlDays:Number(process.env.SESSION_TTL_DAYS??30),production:false});
-app.addHook("onClose",()=>persistence.close());
-for(const signal of ["SIGINT","SIGTERM"] as const)process.on(signal,()=>{void app.close()});
-await app.listen({port:Number(process.env.API_PORT??3001),host:"127.0.0.1"});
+import { createPostgres } from "./plugins/db.ts";
+import {
+  ConsoleEmailSender,
+  SseBroker,
+  clock,
+  ids,
+  hasher,
+} from "@tripapp/infrastructure";
+import { createApp } from "./app.ts";
+if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is required");
+if (process.env.NODE_ENV === "production")
+  throw new Error(
+    "Configure a production EmailSender before running in production; the bundled sender logs login links",
+  );
+const persistence = createPostgres(process.env.DATABASE_URL);
+const app = await createApp({
+  ...persistence,
+  clock,
+  ids,
+  hasher,
+  email: new ConsoleEmailSender(),
+  notifier: new SseBroker(),
+  webOrigin: process.env.WEB_ORIGIN ?? "http://localhost:5173",
+  ttlMinutes: Number(process.env.LOGIN_TOKEN_TTL_MINUTES ?? 15),
+  sessionTtlDays: Number(process.env.SESSION_TTL_DAYS ?? 30),
+  production: false,
+});
+app.addHook("onClose", () => persistence.close());
+for (const signal of ["SIGINT", "SIGTERM"] as const)
+  process.on(signal, () => {
+    void app.close();
+  });
+await app.listen({
+  port: Number(process.env.API_PORT ?? 3001),
+  host: "127.0.0.1",
+});
 console.info("TripApp API ready");

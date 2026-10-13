@@ -191,7 +191,8 @@ export function planMinTransfers(
   if (nodes.length === 0) return [];
   // Explicit operational bound: never return an approximate plan above it.
   if (nodes.length > 20)
-    throw new Error(
+    throw new DomainError(
+      "SETTLEMENT_TOO_LARGE",
       "Exact settlement supports at most 20 nonzero balances per currency",
     );
 

@@ -1,12 +1,156 @@
-import { pgTable, uuid, text, char, timestamp, numeric, date, primaryKey, unique, index, check } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  uuid,
+  text,
+  char,
+  timestamp,
+  numeric,
+  date,
+  primaryKey,
+  unique,
+  index,
+  check,
+} from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
-const times = () => ({createdAt: timestamp("created_at",{withTimezone:true}).notNull().defaultNow(), updatedAt: timestamp("updated_at",{withTimezone:true}).notNull().defaultNow()});
-export const users = pgTable("users", {id:uuid().primaryKey(), email:text().notNull().unique(), status:text().$type<"active"|"deactivated">().notNull().default("active"), ...times()}, t=>[check("user_status",sql`${t.status} in ('active','deactivated')`)]);
-export const projects = pgTable("projects", {id:uuid().primaryKey(),name:text().notNull(),defaultExpenseCurrency:char("default_expense_currency",{length:3}).notNull(),settlementCurrency:char("settlement_currency",{length:3}).notNull(),status:text().$type<"active"|"closed">().notNull(),...times()}, t=>[check("project_status",sql`${t.status} in ('active','closed')`)]);
-export const projectMembers=pgTable("project_members",{projectId:uuid("project_id").notNull().references(()=>projects.id,{onDelete:"cascade"}),userId:uuid("user_id").notNull().references(()=>users.id,{onDelete:"restrict"}),role:text().$type<"owner"|"member">().notNull(),displayName:text("display_name").notNull()},t=>[primaryKey({columns:[t.projectId,t.userId]}),index("members_user_idx").on(t.userId),check("member_role",sql`${t.role} in ('owner','member')`)]);
-export const categories=pgTable("categories",{id:uuid().primaryKey(),name:text().notNull().unique()});
-export const expenses=pgTable("expenses",{id:uuid().primaryKey(),projectId:uuid("project_id").notNull().references(()=>projects.id,{onDelete:"cascade"}),payerUserId:uuid("payer_user_id").notNull().references(()=>users.id,{onDelete:"restrict"}),categoryId:uuid("category_id").references(()=>categories.id,{onDelete:"set null"}),description:text().notNull(),amount:numeric({precision:18,scale:4}).notNull(),currency:char({length:3}).notNull(),fxRate:numeric("fx_rate",{precision:18,scale:8}),settlementAmount:numeric("settlement_amount",{precision:18,scale:4}).notNull(),settlementCurrency:char("settlement_currency",{length:3}).notNull(),expenseDate:date("expense_date"),...times()},t=>[index("expenses_project_date_idx").on(t.projectId,t.expenseDate),check("expense_amount_nonzero",sql`${t.amount} <> 0 AND ${t.settlementAmount} <> 0`),check("expense_fx",sql`(${t.fxRate} IS NULL OR ${t.fxRate}>0) AND (${t.currency}=${t.settlementCurrency} OR ${t.fxRate} IS NOT NULL)`)]);
-export const expenseShares=pgTable("expense_shares",{expenseId:uuid("expense_id").notNull().references(()=>expenses.id,{onDelete:"cascade"}),userId:uuid("user_id").notNull().references(()=>users.id,{onDelete:"restrict"}),shareAmount:numeric("share_amount",{precision:18,scale:4}).notNull()},t=>[primaryKey({columns:[t.expenseId,t.userId]}),check("share_nonzero",sql`${t.shareAmount} <> 0`)]);
-export const fxQuotes=pgTable("fx_quotes",{id:uuid().primaryKey(),baseCurrency:char("base_currency",{length:3}).notNull(),quoteCurrency:char("quote_currency",{length:3}).notNull(),rate:numeric({precision:18,scale:8}).notNull(),quoteDate:date("quote_date").notNull(),source:text().notNull(),...times()},t=>[unique().on(t.baseCurrency,t.quoteCurrency,t.quoteDate),check("quote_positive",sql`${t.rate}>0`)]);
-export const loginTokens=pgTable("login_tokens",{id:uuid().primaryKey(),email:text().notNull(),tokenHash:text("token_hash").notNull().unique(),expiresAt:timestamp("expires_at",{withTimezone:true}).notNull(),consumedAt:timestamp("consumed_at",{withTimezone:true})});
-export const sessions=pgTable("sessions",{id:uuid().primaryKey(),userId:uuid("user_id").notNull().references(()=>users.id,{onDelete:"restrict"}),tokenHash:text("token_hash").notNull().unique(),expiresAt:timestamp("expires_at",{withTimezone:true}).notNull(),createdAt:timestamp("created_at",{withTimezone:true}).notNull()});
+const times = () => ({
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+export const users = pgTable(
+  "users",
+  {
+    id: uuid().primaryKey(),
+    email: text().notNull().unique(),
+    status: text()
+      .$type<"active" | "deactivated">()
+      .notNull()
+      .default("active"),
+    ...times(),
+  },
+  (t) => [check("user_status", sql`${t.status} in ('active','deactivated')`)],
+);
+export const projects = pgTable(
+  "projects",
+  {
+    id: uuid().primaryKey(),
+    name: text().notNull(),
+    defaultExpenseCurrency: char("default_expense_currency", {
+      length: 3,
+    }).notNull(),
+    settlementCurrency: char("settlement_currency", { length: 3 }).notNull(),
+    status: text().$type<"active" | "closed">().notNull(),
+    ...times(),
+  },
+  (t) => [check("project_status", sql`${t.status} in ('active','closed')`)],
+);
+export const projectMembers = pgTable(
+  "project_members",
+  {
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    role: text().$type<"owner" | "member">().notNull(),
+    displayName: text("display_name").notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.projectId, t.userId] }),
+    index("members_user_idx").on(t.userId),
+    check("member_role", sql`${t.role} in ('owner','member')`),
+  ],
+);
+export const categories = pgTable("categories", {
+  id: uuid().primaryKey(),
+  name: text().notNull().unique(),
+});
+export const expenses = pgTable(
+  "expenses",
+  {
+    id: uuid().primaryKey(),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    payerUserId: uuid("payer_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    categoryId: uuid("category_id").references(() => categories.id, {
+      onDelete: "set null",
+    }),
+    description: text().notNull(),
+    amount: numeric({ precision: 18, scale: 4 }).notNull(),
+    currency: char({ length: 3 }).notNull(),
+    fxRate: numeric("fx_rate", { precision: 18, scale: 8 }),
+    settlementAmount: numeric("settlement_amount", {
+      precision: 18,
+      scale: 4,
+    }).notNull(),
+    settlementCurrency: char("settlement_currency", { length: 3 }).notNull(),
+    expenseDate: date("expense_date"),
+    ...times(),
+  },
+  (t) => [
+    index("expenses_project_date_idx").on(t.projectId, t.expenseDate),
+    check(
+      "expense_amount_nonzero",
+      sql`${t.amount} <> 0 AND ${t.settlementAmount} <> 0`,
+    ),
+    check(
+      "expense_fx",
+      sql`(${t.fxRate} IS NULL OR ${t.fxRate}>0) AND (${t.currency}=${t.settlementCurrency} OR ${t.fxRate} IS NOT NULL)`,
+    ),
+  ],
+);
+export const expenseShares = pgTable(
+  "expense_shares",
+  {
+    expenseId: uuid("expense_id")
+      .notNull()
+      .references(() => expenses.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    shareAmount: numeric("share_amount", { precision: 18, scale: 4 }).notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.expenseId, t.userId] }),
+    check("share_nonzero", sql`${t.shareAmount} <> 0`),
+  ],
+);
+export const fxQuotes = pgTable(
+  "fx_quotes",
+  {
+    id: uuid().primaryKey(),
+    baseCurrency: char("base_currency", { length: 3 }).notNull(),
+    quoteCurrency: char("quote_currency", { length: 3 }).notNull(),
+    rate: numeric({ precision: 18, scale: 8 }).notNull(),
+    quoteDate: date("quote_date").notNull(),
+    source: text().notNull(),
+    ...times(),
+  },
+  (t) => [
+    unique().on(t.baseCurrency, t.quoteCurrency, t.quoteDate),
+    check("quote_positive", sql`${t.rate}>0`),
+  ],
+);
+export const loginTokens = pgTable("login_tokens", {
+  id: uuid().primaryKey(),
+  email: text().notNull(),
+  tokenHash: text("token_hash").notNull().unique(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  consumedAt: timestamp("consumed_at", { withTimezone: true }),
+});
+export const sessions = pgTable("sessions", {
+  id: uuid().primaryKey(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "restrict" }),
+  tokenHash: text("token_hash").notNull().unique(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
+});

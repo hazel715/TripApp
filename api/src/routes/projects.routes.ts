@@ -1,1 +1,1 @@
-export { projectsController as projectsRoutes } from '../controllers/projects.controller.ts';
+export { projectsController as projectsRoutes } from "../controllers/projects.controller.ts";

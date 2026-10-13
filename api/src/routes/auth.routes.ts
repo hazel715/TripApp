@@ -1,1 +1,1 @@
-export { authController as authRoutes } from '../controllers/auth.controller.ts';
+export { authController as authRoutes } from "../controllers/auth.controller.ts";

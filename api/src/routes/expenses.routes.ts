@@ -1,1 +1,1 @@
-export { expensesController as expensesRoutes } from '../controllers/expenses.controller.ts';
+export { expensesController as expensesRoutes } from "../controllers/expenses.controller.ts";
