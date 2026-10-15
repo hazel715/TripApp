@@ -1,6 +1,6 @@
 # 프로젝트 개요
 
-이 문서는 **프로젝트 단위 공동 가계부(TripApp)** 의 아키텍처 지도다. 세부 규칙은 하위 문서를 따른다.
+이 문서는 **프로젝트 단위 공동 정산 앱** 의 아키텍처 지도다. 세부 규칙은 하위 문서를 따른다.
 
 - 제품: [product/requirements.md](./product/requirements.md), [product/scope.md](./product/scope.md), [product/user-flows.md](./product/user-flows.md)
 - 도메인: [domain/domain-model.md](./domain/domain-model.md)
@@ -14,7 +14,7 @@
 
 MVP는 저장소 루트의 `web/`, `api/`, `application/`, `domain/`, `infrastructure/` 에 구현되어 있다.
 
-레거시 `app.jsx` / `index.html` 은 청두 여행 가이드이며 신규 persistence로 사용하지 않는다. Firebase Firestore는 신규 DB가 아니다.
+레거시 `app.jsx` / `index.html` 은 청두 여행 가이드이며 신규 persistence로 사용하지 않는다. 현재 신규 DB는 PostgreSQL이다. Firebase 활용 계획은 PostgreSQL을 유지하는 방향이며 Firestore 전환은 하지 않는다.
 
 ## 한 줄 정의
 
@@ -100,3 +100,7 @@ TripApp/
 - 재사용할 것은 정산 부호, 지출 UX, Quick Memo 입력 패턴이다. [legacy/reusable-logic.md](./legacy/reusable-logic.md)
 - 데이터 이관은 필수가 아니다. [data/migration-strategy.md](./data/migration-strategy.md)
 - 레거시의 빈 환율 fallback 상수(`DEFAULT_CNY_RATE` 등)는 신규 정산에 쓰지 않는다.
+
+## 2026-10-15 운영 방향
+
+정식 타이틀은 미정이다. 화면의 TripApp을 제거하고 임시로 공동 정산을 사용한다. PostgreSQL을 유지하면서 Firebase 활용과 Vercel 배포, 온라인/로컬 개발 병행을 준비한다. 현재 구현과 배포 준비 상태는 [온라인/로컬 개발 계획](./development-and-deployment.md)을 따른다. 통화 선택 및 환산 금액 제안 UX는 아직 미구현이다.

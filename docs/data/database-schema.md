@@ -1,6 +1,6 @@
 # 데이터베이스 스키마
 
-기존 Firestore 문서를 복사하지 않는다. 레거시 형태는 [../legacy/legacy-analysis.md](../legacy/legacy-analysis.md). 무결성은 [data-rules.md](./data-rules.md). 개념은 [../domain/domain-model.md](./domain/domain-model.md).
+기존 Firestore 문서를 복사하지 않는다. 레거시 형태는 [../legacy/legacy-analysis.md](../legacy/legacy-analysis.md). 무결성은 [data-rules.md](./data-rules.md). 개념은 [../domain/domain-model.md](../domain/domain-model.md).
 
 대상 엔진은 **PostgreSQL**. ORM/query builder는 **Drizzle**.
 
@@ -115,3 +115,7 @@ UNIQUE `(base_currency, quote_currency, quote_date)`
 - `sessions`: user_id, token_hash, expires_at
 
 One-time token은 짧은 만료, 1회 사용.
+
+## 온라인/로컬 병행 방향 (2026-10-15)
+
+PostgreSQL/Drizzle 및 현재 레이어 경계를 유지한다. Firebase 활용 제품과 온라인 DB 제공자는 아직 선정하지 않았고 Firestore로 전환하지 않는다. Vercel 배포·운영 이메일·환경별 DB 연결은 아직 준비 단계다. 현재 구현과 후속 검증은 [온라인/로컬 개발 계획](../development-and-deployment.md)을 따른다.

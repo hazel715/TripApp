@@ -50,3 +50,7 @@ Passwordless email → 15분 one-time link → 기존 로그인/신규 가입 �
 FX는 사용자가 currency/fx_rate/settlement_amount를 확정한다. fx_quotes와 Domain FxQuotePort를 준비했지만 외부 API adapter는 미구현·미사용이다.
 
 DATABASE_URL과 향후 Email/FX 키는 서버 환경 변수이며 브라우저에 관리자 키를 전달하지 않는다. 실행과 제한은 README, endpoint는 api.md를 참고한다.
+
+## 온라인/로컬 병행 방향 (2026-10-15)
+
+PostgreSQL/Drizzle 및 현재 레이어 경계를 유지한다. Firebase 활용 제품과 온라인 DB 제공자는 아직 선정하지 않았고 Firestore로 전환하지 않는다. Vercel 배포·운영 이메일·환경별 DB 연결은 아직 준비 단계다. 현재 구현과 후속 검증은 [온라인/로컬 개발 계획](../development-and-deployment.md)을 따른다.

@@ -98,7 +98,7 @@ function App() {
   return (
     <>
       <header>
-        <strong>TripApp</strong>
+        <strong>공동 정산</strong>
         <span>함께 쓰고, 정확하게 나누기</span>
         {user && (
           <>
@@ -499,7 +499,7 @@ function App() {
           </>
         )}
       </main>
-      <footer>TripApp · 공동 비용을 투명하게</footer>
+      <footer>공동 비용을 투명하게</footer>
     </>
   );
 }

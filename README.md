@@ -1,8 +1,16 @@
-# TripApp Refactory
+# 공동 정산 앱
 
 프로젝트 단위 공동 가계부 MVP. 기존 `app.jsx`와 루트 `index.html`은 청두 여행 레거시로 보존하며, 신규 웹은 `web/`에서 실행한다.
 
 React → Fastify HTTP API → Application → 순수 Domain과 repository port → Infrastructure(PostgreSQL/Drizzle). 정산 결과는 저장하지 않는다.
+
+## 현재 상태와 운영 계획
+
+정산용 신규 앱이며 정식 타이틀은 추후 정한다. 화면은 임시로 '공동 정산'을 표시한다. 현재 DB는 PostgreSQL + Drizzle이며, PostgreSQL을 유지하면서 익숙한 Firebase 프로젝트를 활용하는 방향을 검토한다. Firestore로 전환하지 않는다.
+
+Vercel 온라인 배포와 로컬/Codespaces 병행이 목표다. 아직 온라인 배포·운영 DB·실서비스 이메일 연결은 완료하지 않았다. 코드 push만으로 로컬 DB 데이터가 업로드되지는 않는다. 후보 서비스·배포 준비 항목은 [온라인/로컬 개발 계획](docs/development-and-deployment.md)을 따른다.
+
+현재 통화는 직접 입력이며 정산 금액의 자동 제안도 미구현이다. 주요 통화 선택과 Decimal 환산 금액 제안 후 직접 수정 UX를 후속 작업으로 기록했다. 핵심 저장·Share 검증·최소 송금 계산의 구현 완료와 입력 편의/운영 준비 완료를 구분한다.
 
 ## 개발 실행
 

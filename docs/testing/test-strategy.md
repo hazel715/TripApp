@@ -8,3 +8,7 @@ Vitest source 테스트만 검색하며 dist 산출물을 중복 실행하지 �
 - Web: Decimal 균등 분할 단위 테스트. Chrome smoke로 이메일 callback부터 프로젝트/멤버/지출/현황/최종 송금까지 확인하고 desktop/mobile 스크린샷을 검사했다. 브라우저 smoke는 현재 수동 실행 검증이며 CI 자동 E2E는 추가하지 않았다.
 
 실행: npm test (DB 제외), npm run test:integration (실제 PostgreSQL). 자세한 환경은 README. CI는 PostgreSQL 16 service를 사용한다. 로컬 검증에는 embedded PostgreSQL 18을 사용했다. 마지막 결과는 refactory-progress.md를 따른다.
+
+## 온라인/로컬 병행 방향 (2026-10-15)
+
+PostgreSQL/Drizzle 및 현재 레이어 경계를 유지한다. Firebase 활용 제품과 온라인 DB 제공자는 아직 선정하지 않았고 Firestore로 전환하지 않는다. Vercel 배포·운영 이메일·환경별 DB 연결은 아직 준비 단계다. 현재 구현과 후속 검증은 [온라인/로컬 개발 계획](../development-and-deployment.md)을 따른다.

@@ -53,3 +53,15 @@
 ## Next step
 
 README의 개발 실행 절차로 사용한다. 운영 배포가 필요해지면 EmailSender와 secure cookie/공유 broker를 준비한다. 후속 구현 시 git status, git log --oneline -10, 이 문서를 먼저 확인하고 완료 Phase를 반복하지 않는다.
+
+## 2026-10-15 후속 정리
+
+- 사용자 확인: PostgreSQL 유지 + 익숙한 Firebase 프로젝트 활용 방향. Firestore 전환 아님.
+- 목표: Vercel 온라인 실행/영속 데이터와 로컬/Codespaces 병행. 실제 서비스/DB 생성·배포는 미완료.
+- 화면/브라우저 제목/푸터에서 TripApp 제거, 임시 표기 공동 정산. 정식 타이틀은 사용자 추후 결정.
+- README와 제품/아키텍처/DB/이관/프론트/테스트 문서를 현재 구현과 후속 운영 계획으로 구분.
+- 이전 Remaining의 필수 구현 없음 표현은 당시 핵심 범위 기준. 추가 요구인 통화 선택·환산 제안·온라인 배포·Codespaces 정비는 미완료다.
+- 상세 후보/순서/환경 분리: [온라인/로컬 개발 계획](./development-and-deployment.md).
+- 검증 결과는 아래 최종 기록을 따른다.
+
+검증: Web typecheck/build/ESLint 통과. 화면 소스와 브라우저 제목에 TripApp 표기 없음. 문서 내부 링크 검사에서 발견한 기존 DB 문서의 Domain 링크 수정. 이번 변경은 문서와 표기 변경으로 Domain/DB 규칙을 변경하지 않았으며 테스트를 새로 추가하지 않았다.
